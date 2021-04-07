@@ -4,64 +4,36 @@ from jsonschema import validate, Draft7Validator as Validator
 from jsonschema.exceptions import ValidationError
 
 
-# FORM_TEMPLATE = [
-#     {"name" : "username"},
-#     {"name" : "age", "type": "number"}
-# ]
-FORM_SCHEMA = {
-  "$id": "location.schema",
-  "$schema": "https://json-schema.org/draft/2020-12/schema",
-  "title": "Longitude and Latitude Values",
-  "description": "A geographical coordinate.",
-  "required": [ "latitude", "longitude", "target" ],
-  "type": "object",
-  "properties": {
-    "latitude": {
-      "type": "number",
-      "minimum": -90,
-      "maximum": 90
-    },
-    "longitude": {
-      "type": "number",
-      "minimum": -180,
-      "maximum": 180
-    },
-    "target": {
-        "type": "string"
-    },
-    "comments": {
-        "type": "string"
-    }
-  }
-}
+_v = None
+_form = None
 
-
-
-
-def register_schema(schema=FORM_SCHEMA):
+def register_schema(schema):
     """
-    Register 'schema' to be used with class::Validator. Return instance of Validator(schema)
+    Register 'schema' to be used with class::Validator. Set module variable ('_v'). Return None.
     """
     global _v
+    global _form
     try:
         _tmp = Validator(schema)
     except Exception as err:
-        raise err
-    else:
         _tmp = None
+        raise err
     finally:
         _v = _tmp
+        _form = schema if _v else None
+    return None
 
 
-_v = register_schema(FORM_SCHEMA)
+register_schema({})
+assert _v, "Validator should be set here, with an useless content (empty), but set."
 
-
-def parse_form(form_data, form_schema = FORM_SCHEMA):
+def parse_form(form_data):
     """
     Return 'form_data' with some values (eg, "number") parsed/cast (eg, "float")
 
     Because everything from html/form/input come as strings, we should parse some.
     """
+    form_schema=_form
     props = form_schema['properties']
     out = form_data.copy()
     for name,value in form_data.items():
@@ -73,7 +45,8 @@ def validate_form(form_data):
     """
     Return True if validation agains schema registered, see function::register_schema()
     """
-    errors = sorted(_v.iter_errors(form_data), key=lambda e: e.path)
+    validator=_v
+    errors = sorted(validator.iter_errors(form_data), key=lambda e: e.path)
     if errors:
         msgs = {}
         for error in errors:
@@ -86,8 +59,18 @@ def validate_form(form_data):
 def do_submit(form_template=None):
     return 'do_submit'
 
-def show_form(error=None, schema=FORM_SCHEMA, values=None):
-    assert schema['type'] == 'object'
+def show_form(error=None, values=None):
+    """
+    Render the form from 'properties' object in 'schema' (see json-schema.org)
+
+    If 'values' is provided they will be used to fill the form fields.
+    'values' is a dictionary of '{name : value}', where 'name' should match
+    the 'schema['properties']' object.
+    """
+    schema = _form
+    if not 'properties' in schema:
+        return f"Schema is not valid: '{schema}'"
+
     _schema = []
     for name,params in schema['properties'].items():
         _s = {"name": name}

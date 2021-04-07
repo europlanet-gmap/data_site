@@ -11,6 +11,39 @@ import _hello
 import _submit
 
 
+FORM_SCHEMA = {
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+
+  "$id": "location.schema",
+
+  "title": "Longitude and Latitude Values",
+  "description": "A geographical coordinate.",
+
+  "required": [ "latitude", "longitude", "target" ],
+  "type": "object",
+  "properties": {
+    "latitude": {
+      "type": "number",
+      "minimum": -90,
+      "maximum": 90
+    },
+    "longitude": {
+      "type": "number",
+      "minimum": -180,
+      "maximum": 180
+    },
+    "target": {
+        "type": "string"
+    },
+    "comments": {
+        "type": "string"
+    }
+  }
+}
+
+# _submit.register_schema({})
+_submit.register_schema(FORM_SCHEMA)
+
 app = Flask(__name__)
 
 # Set the secret key to some random bytes. Keep this really secret!
