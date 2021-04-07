@@ -1,0 +1,22 @@
+{% extends "layout.html" %}
+
+{% block title %}Index{% endblock %}
+{% block content %}
+  <h1>Submit form</h1>
+  <form method="POST">
+    {% for field in fields %}
+      <p>{{ field }}</p>
+      <p>{{ input(**field) }}</p>
+    {% endfor %}
+    <input type="submit" value="Submit">
+  </form>
+{% endblock %}
+
+{% macro input(name, value='', type='text', size=20) -%}
+    <label for="{{ name }}">{{ name }}</label>
+    {% if type is equalto "number" %}
+    <input type="{{ type }}" id="{{ name }}" name="{{ name }}" value="{{ value|e|float }}" size="{{ size }}">
+    {% else %}
+    <input type="{{ type }}" id="{{ name }}" name="{{ name }}" value="{{ value|e }}" size="{{ size }}">
+    {% endif %}
+{%- endmacro %}

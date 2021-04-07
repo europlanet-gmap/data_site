@@ -9,6 +9,15 @@ The backend being Python eases the integration between frontend and the backend
 tools we already have built.
 
 
+## Run in development mode
+
+```bash
+$ export FLASK_APP=app.py
+$ export FLASK_ENV=development
+$ flask run
+```
+
+
 # TODO
 
 - [ ] Make a frontpage (index) with a minimal form (eg, "{ name: <> }")
