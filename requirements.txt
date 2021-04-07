@@ -1,0 +1,13 @@
+attrs==20.3.0
+certifi==2020.12.5
+click==7.1.2
+Flask==1.1.2
+itsdangerous==1.1.0
+Jinja2 @ file:///home/conda/feedstock_root/build_artifacts/jinja2_1612119311452/work
+jsonschema==3.2.0
+MarkupSafe @ file:///Users/runner/miniforge3/conda-bld/markupsafe_1610127727012/work
+pyrsistent==0.17.3
+rfc3986==1.4.0
+six==1.15.0
+watchdog==2.0.2
+Werkzeug==1.0.1
