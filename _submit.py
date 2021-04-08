@@ -38,7 +38,10 @@ def parse_form(form_data):
     out = form_data.copy()
     for name,value in form_data.items():
         if props[name]['type'] == 'number':
-            out[name] = float(value)
+            try:
+                out[name] = float(value)
+            except:
+                out[name] = 0
     return out
 
 def validate_form(form_data):
@@ -77,5 +80,7 @@ def show_form(error=None, values=None):
         _s['type'] = params['type']
         if values and name in values:
             _s['value'] = values[name]
+        if 'enum' in params:
+            _s['enum'] = params['enum']
         _schema.append(_s)
     return render_template('submit.html', fields=_schema)
