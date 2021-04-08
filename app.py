@@ -26,6 +26,7 @@ _curdir = os.path.dirname(os.path.abspath(__file__))
 # with open(os.path.join(_curdir, 'form.schema.json'), 'r') as fp:
 #     FORM_SCHEMA = json.load(fp)
 # del _curdir
+
 _submit.register_schema(FORM_SCHEMA)
 
 
@@ -96,7 +97,7 @@ def submit(values={'files':None, 'metadata':None}):
                                             )
                     return out
                 except Exception as err:
-                    error = str(err)
+                    raise err
             else:
                 error = 'Invalid fields'
         else:

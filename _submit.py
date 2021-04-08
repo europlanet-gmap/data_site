@@ -1,3 +1,6 @@
+"""
+Submit holds the functions and object to show and validate data for a json-schema.
+"""
 from flask import render_template
 
 from jsonschema import validate, Draft7Validator as Validator
@@ -5,8 +8,12 @@ from jsonschema.exceptions import ValidationError
 
 import backend
 
-_v = None
+
+# '_form' is a json-schema compliant schema (see https://json-schema.org/learn/)
+# '_form' is a python dictionary
 _form = None
+# '_v' holds a 'jsonschema' validator. Its content is dictated by '_form'
+_v = None
 
 def register_schema(schema):
     """
@@ -24,15 +31,24 @@ def register_schema(schema):
         _form = schema if _v else None
     return None
 
-
+# Register an empty object (nothing to exibit)
+# An empty '{}' json-schema is valid, it accepts everything
+# (https://json-schema.org/understanding-json-schema/basics.html)
+# but it has nothing to show for a form -- our purpose here.
 register_schema({})
+# A more meaningful (sample) schema would be:
+register_schema({ 'type':'object', 'properties':{ 'test':{ 'type':'string' }}})
+# , providing a field "test" of type "string" in our initial form.
 assert _v, "Validator should be set here, with an useless content (empty), but set."
+
 
 def parse_form(form_data):
     """
     Return 'form_data' with some values (eg, "number") parsed/cast (eg, "float")
 
-    Because everything from html/form/input come as strings, we should parse some.
+    This function is applied to data comming from a web form and confronted with '_form'.
+    Some values, like "number" (in the _form/_v schema), should be parsed,
+    because everything from html/form/input come as string.
     """
     form_schema=_form
     props = form_schema['properties']
@@ -45,9 +61,12 @@ def parse_form(form_data):
                 out[name] = 0
     return out
 
+
 def validate_form(form_data):
     """
-    Return True if validation agains schema registered, see function::register_schema()
+    Return True if validation against schema registered, see function::register_schema()
+
+    'form_data' is a key-value structure like: {'test':'Hi!'}
     """
     validator=_v
     errors = sorted(validator.iter_errors(form_data), key=lambda e: e.path)
@@ -59,6 +78,7 @@ def validate_form(form_data):
         print(msgs)
         return False
     return True
+
 
 def do_submit(metadata, files, files_path):
     return backend.compose_package(metadata, files, files_path)

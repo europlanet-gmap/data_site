@@ -12,8 +12,9 @@ def verify_data(filename):
 
 def compose_package(metadata, files, files_path):
     import os
+    report = ""
     try:
-        pkg = gpt.GPkg()
+        pkg = gpt.GPkg(meta=metadata)
         if files:
             for filename in files:
                 _ext = filename.split('.')[-1]
@@ -25,5 +26,6 @@ def compose_package(metadata, files, files_path):
                     continue
         report = str(pkg)
     except Exception as err:
-        report = f"Something went wrong: {str(err)}"
+        # report = f"Something went wrong: {str(err)}"
+        raise err
     return report
