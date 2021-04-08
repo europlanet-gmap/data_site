@@ -12,10 +12,16 @@
   </form>
 {% endblock %}
 
-{% macro input(name, value='', type='text', size=20) -%}
+{% macro input(name, value='', type='text', size=20, enum=None) -%}
     <label for="{{ name }}">{{ name }}</label>
     {% if type is equalto "number" %}
     <input type="{{ type }}" id="{{ name }}" name="{{ name }}" value="{{ value|e|float }}" size="{{ size }}">
+    {% elif enum is iterable %}
+    <select name="{{ name }}" id="{{ name }}">
+      {% for item in enum %}
+      <option value="{{ item }}">{{ item }}</option>
+      {% endfor %}
+    </select>
     {% else %}
     <input type="{{ type }}" id="{{ name }}" name="{{ name }}" value="{{ value|e }}" size="{{ size }}">
     {% endif %}
