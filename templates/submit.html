@@ -1,7 +1,14 @@
 {% extends "layout.html" %}
 
-{% block title %}Index{% endblock %}
+{% block title %}Submit form{% endblock %}
+
 {% block content %}
+  <h1>Upload new File</h1>
+  <form method=post enctype=multipart/form-data>
+    <input type=file name=file>
+    <input type=submit value=Upload>
+  </form>
+
   <h1>Submit form</h1>
   <form method="POST">
     {% for field in fields %}
