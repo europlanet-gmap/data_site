@@ -90,7 +90,10 @@ def submit(values={'files':None, 'metadata':None}):
             if form_ok:
                 try:
                     # If "do-submit" succeeds, out is some green html page
-                    out = _submit.do_submit(form_parsed)
+                    out = _submit.do_submit(metadata=values['metadata'],
+                                            files=values['files'],
+                                            files_path=os.path.join(app.config['UPLOAD_FOLDER'])
+                                            )
                     return out
                 except Exception as err:
                     error = str(err)

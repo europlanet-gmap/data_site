@@ -3,6 +3,7 @@ from flask import render_template
 from jsonschema import validate, Draft7Validator as Validator
 from jsonschema.exceptions import ValidationError
 
+import backend
 
 _v = None
 _form = None
@@ -59,8 +60,8 @@ def validate_form(form_data):
         return False
     return True
 
-def do_submit(form_template=None):
-    return 'do_submit'
+def do_submit(metadata, files, files_path):
+    return backend.compose_package(metadata, files, files_path)
 
 def show_form(error=None, metadata=None, files=None):
     """

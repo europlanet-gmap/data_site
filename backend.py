@@ -9,3 +9,21 @@ def verify_data(filename):
     else:
         return False
     return True
+
+def compose_package(metadata, files, files_path):
+    import os
+    try:
+        pkg = gpt.GPkg()
+        if files:
+            for filename in files:
+                _ext = filename.split('.')[-1]
+                if _ext in ('gpkg','zip'):
+                    pkg.load_gpkg(os.path.join(files_path,filename))
+                elif _ext in ('tif','tiff'):
+                    pkg.load_tiff(os.path.join(files_path,filename))
+                else:
+                    continue
+        report = str(pkg)
+    except Exception as err:
+        report = f"Something went wrong: {str(err)}"
+    return report
