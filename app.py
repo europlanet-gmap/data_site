@@ -13,6 +13,7 @@ import _home
 import _hello
 import _submit
 
+import backend
 
 app = Flask(__name__)
 
@@ -31,7 +32,7 @@ _submit.register_schema(FORM_SCHEMA)
 UPLOAD_FOLDER = os.path.join(_curdir, 'uploads')
 if not os.path.exists(UPLOAD_FOLDER):
     os.mkdir(UPLOAD_FOLDER)
-ALLOWED_EXTENSIONS = {'txt', 'pdf', 'png', 'jpg', 'jpeg', 'gif'}
+ALLOWED_EXTENSIONS = {'tif', 'tiff', 'zip', 'gpkg'}
 app.config['UPLOAD_FOLDER'] = UPLOAD_FOLDER
 
 
@@ -72,9 +73,6 @@ def hello(name=None):
 
 @app.route('/submit', methods=['GET', 'POST'])
 def submit(values={'files':None, 'metadata':None}):
-    print(values)
-    print(request.files)
-    print(request.form)
     if request.method == 'POST':
         form_files = None
         form_metadata = None
@@ -114,9 +112,19 @@ def submit(values={'files':None, 'metadata':None}):
                 return redirect(request.url)
             if file and allowed_file(file.filename):
                 filename = secure_filename(file.filename)
-                file.save(os.path.join(app.config['UPLOAD_FOLDER'], filename))
-                values['files'] = values['files'] + [filename] if values['files'] else [filename]
-        return _submit.show_form(error=error, metadata=values['metadata'], files=values['files'])
+                localpath = os.path.join(app.config['UPLOAD_FOLDER'], filename)
+                file.save(localpath)
+                try:
+                    res = backend.verify_data(localpath)
+                except Exception as err:
+                    os.remove(localpath)
+                    raise err
+                else:
+                    if res:
+                        values['files'] = values['files'] + [filename] if values['files'] else [filename]
+                    else:
+                        os.remove(localpath)
+        # return _submit.show_form(error=error, metadata=values['metadata'], files=values['files'])
 
     return _submit.show_form(metadata=values['metadata'], files=values['files'])
 
