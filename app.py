@@ -1,4 +1,5 @@
 import os
+import json
 
 from flask import Flask
 from flask import request
@@ -11,37 +12,14 @@ import _hello
 import _submit
 
 
-FORM_SCHEMA = {
-  "$schema": "https://json-schema.org/draft/2020-12/schema",
+# # Load the (default) schema
+# #
+# _curdir = os.path.dirname(os.path.abspath(__file__))
+# with open(os.path.join(_curdir, 'form.schema.json'), 'r') as fp:
+#     FORM_SCHEMA = json.load(fp)
+# del _curdir
+from form_schema import schema as FORM_SCHEMA
 
-  "$id": "location.schema",
-
-  "title": "Longitude and Latitude Values",
-  "description": "A geographical coordinate.",
-
-  "required": [ "latitude", "longitude", "target" ],
-  "type": "object",
-  "properties": {
-    "latitude": {
-      "type": "number",
-      "minimum": -90,
-      "maximum": 90
-    },
-    "longitude": {
-      "type": "number",
-      "minimum": -180,
-      "maximum": 180
-    },
-    "target": {
-        "type": "string"
-    },
-    "comments": {
-        "type": "string"
-    }
-  }
-}
-
-# _submit.register_schema({})
 _submit.register_schema(FORM_SCHEMA)
 
 app = Flask(__name__)
