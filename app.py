@@ -1,28 +1,40 @@
 import os
 import json
 
-from flask import Flask
+from flask import Flask, flash
 from flask import request
 from flask import redirect, url_for
 from flask import session, escape
 from flask import render_template
+
+from werkzeug.utils import secure_filename
 
 import _home
 import _hello
 import _submit
 
 
+app = Flask(__name__)
+
+
+from form_schema import schema as FORM_SCHEMA
+
 # # Load the (default) schema
 # #
-# _curdir = os.path.dirname(os.path.abspath(__file__))
+_curdir = os.path.dirname(os.path.abspath(__file__))
 # with open(os.path.join(_curdir, 'form.schema.json'), 'r') as fp:
 #     FORM_SCHEMA = json.load(fp)
 # del _curdir
-from form_schema import schema as FORM_SCHEMA
-
 _submit.register_schema(FORM_SCHEMA)
 
-app = Flask(__name__)
+
+UPLOAD_FOLDER = os.path.join(_curdir, 'uploads')
+if not os.path.exists(UPLOAD_FOLDER):
+    os.mkdir(UPLOAD_FOLDER)
+ALLOWED_EXTENSIONS = {'txt', 'pdf', 'png', 'jpg', 'jpeg', 'gif'}
+app.config['UPLOAD_FOLDER'] = UPLOAD_FOLDER
+
+
 
 # Set the secret key to some random bytes. Keep this really secret!
 app.secret_key = os.urandom(16)
@@ -59,26 +71,59 @@ def hello(name=None):
 
 
 @app.route('/submit', methods=['GET', 'POST'])
-def submit():
+def submit(values={'files':None, 'metadata':None}):
+    print(values)
+    print(request.files)
+    print(request.form)
     if request.method == 'POST':
+        form_files = None
+        form_metadata = None
         error = None
-        try:
-            form_parsed = _submit.parse_form(request.form)
-            form_ok = _submit.validate_form(form_parsed)
-        except Exception as err:
-            raise err
-
-        if form_ok:
+        if '_form_metadata' in request.form:
+            _form = request.form.copy()
+            _form.pop('_form_metadata')
             try:
-                # If "do-submit" succeeds, out is some green html page
-                out = _submit.do_submit(form_parsed)
-                return out
+                form_parsed = _submit.parse_form(_form)
+                form_ok = _submit.validate_form(form_parsed)
             except Exception as err:
-                error = str(err)
+                raise err
+            else:
+                values['metadata'] = form_parsed
+            if form_ok:
+                try:
+                    # If "do-submit" succeeds, out is some green html page
+                    out = _submit.do_submit(form_parsed)
+                    return out
+                except Exception as err:
+                    error = str(err)
+            else:
+                error = 'Invalid fields'
         else:
-            error = 'Invalid fields'
-        return _submit.show_form(error=error, values=form_parsed)
-    return _submit.show_form()
+            assert '_form_upload' in request.form
+            # _form = request.form.copy()
+            # _form.pop('_form_upload')
+            # check if the post request has the file part
+            if 'file' not in request.files:
+                flash('No file part')
+                return redirect(request.url)
+            file = request.files['file']
+            # if user does not select file, browser also
+            # submit an empty part without filename
+            if file.filename == '':
+                flash('No selected file')
+                return redirect(request.url)
+            if file and allowed_file(file.filename):
+                filename = secure_filename(file.filename)
+                file.save(os.path.join(app.config['UPLOAD_FOLDER'], filename))
+                values['files'] = values['files'] + [filename] if values['files'] else [filename]
+        return _submit.show_form(error=error, metadata=values['metadata'], files=values['files'])
+
+    return _submit.show_form(metadata=values['metadata'], files=values['files'])
+
+
+def allowed_file(filename):
+    return '.' in filename and \
+           filename.rsplit('.', 1)[1].lower() in ALLOWED_EXTENSIONS
 
 
 @app.route('/upload', methods=['GET', 'POST'])

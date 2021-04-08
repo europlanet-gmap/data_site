@@ -4,9 +4,14 @@
 
 {% block content %}
   <h1>Upload new File</h1>
+  {% if files is not none %}
+    {% for filename in files %}
+      <p>{{ filename }}</p>
+    {% endfor %}
+  {% endif %}
   <form method=post enctype=multipart/form-data>
     <input type=file name=file>
-    <input type=submit value=Upload>
+    <input type=submit value=Upload name="_form_upload">
   </form>
 
   <h1>Submit form</h1>
@@ -15,9 +20,10 @@
       <p>{{ field }}</p>
       <p>{{ input(**field) }}</p>
     {% endfor %}
-    <input type="submit" value="Submit">
+    <input type="submit" value="Submit" name="_form_metadata">
   </form>
 {% endblock %}
+
 
 {% macro input(name, value='', type='text', size=20, enum=None) -%}
     <label for="{{ name }}">{{ name }}</label>

@@ -62,7 +62,7 @@ def validate_form(form_data):
 def do_submit(form_template=None):
     return 'do_submit'
 
-def show_form(error=None, values=None):
+def show_form(error=None, metadata=None, files=None):
     """
     Render the form from 'properties' object in 'schema' (see json-schema.org)
 
@@ -78,9 +78,9 @@ def show_form(error=None, values=None):
     for name,params in schema['properties'].items():
         _s = {"name": name}
         _s['type'] = params['type']
-        if values and name in values:
-            _s['value'] = values[name]
+        if metadata and name in metadata:
+            _s['value'] = metadata[name]
         if 'enum' in params:
             _s['enum'] = params['enum']
         _schema.append(_s)
-    return render_template('submit.html', fields=_schema)
+    return render_template('submit.html.j2', fields=_schema, files=files)
