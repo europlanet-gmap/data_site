@@ -1,15 +1,41 @@
 {% extends 'base.html' %}
 
-{% block header %}
-  <h1>{% block title %}New Post{% endblock %}</h1>
-{% endblock %}
+{% block title %}Submit form{% endblock %}
 
 {% block content %}
-  <form method="post">
-    <label for="title">Title</label>
-    <input name="title" id="title" value="{{ request.form['title'] }}" required>
-    <label for="body">Body</label>
-    <textarea name="body" id="body">{{ request.form['body'] }}</textarea>
-    <input type="submit" value="Save">
+  <h1>Upload new File</h1>
+  {% if files is not none %}
+    {% for filename in files %}
+      <p>{{ filename }}</p>
+    {% endfor %}
+  {% endif %}
+  <form method=post enctype=multipart/form-data>
+    <input type=file name=file>
+    <input type=submit value=Upload name="_form_upload">
+  </form>
+
+  <h1>Submit form</h1>
+  <form method="POST">
+    {% for field in fields %}
+      <p>{{ field }}</p>
+      <p>{{ input(**field) }}</p>
+    {% endfor %}
+    <input type="submit" value="Submit" name="_form_metadata">
   </form>
 {% endblock %}
+
+
+{% macro input(name, value='', type='text', size=20, enum=None) -%}
+    <label for="{{ name }}">{{ name }}</label>
+    {% if type is equalto "number" %}
+    <input type="{{ type }}" id="{{ name }}" name="{{ name }}" value="{{ value|e|float }}" size="{{ size }}">
+    {% elif enum is iterable %}
+    <select name="{{ name }}" id="{{ name }}">
+      {% for item in enum %}
+      <option value="{{ item }}">{{ item }}</option>
+      {% endfor %}
+    </select>
+    {% else %}
+    <input type="{{ type }}" id="{{ name }}" name="{{ name }}" value="{{ value|e }}" size="{{ size }}">
+    {% endif %}
+{%- endmacro %}

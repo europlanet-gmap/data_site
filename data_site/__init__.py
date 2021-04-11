@@ -35,4 +35,12 @@ def create_app(test_config=None):
     app.register_blueprint(blog.bp)
     app.add_url_rule('/', endpoint='index')
 
+    _curdir = os.path.dirname(os.path.abspath(__file__))
+    UPLOAD_FOLDER = os.path.join(_curdir, 'uploads')
+    if not os.path.exists(UPLOAD_FOLDER):
+        os.mkdir(UPLOAD_FOLDER)
+    app.config['UPLOAD_FOLDER'] = UPLOAD_FOLDER
+    ALLOWED_EXTENSIONS = {'tif', 'tiff', 'zip', 'gpkg', 'pdf', 'png', 'jpg'}
+    app.config['ALLOWED_EXTENSIONS'] = ALLOWED_EXTENSIONS
+
     return app
