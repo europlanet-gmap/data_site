@@ -13,7 +13,6 @@
     </ul>
     {% endif %}
     <div class="form-group">
-      <!-- <label for="file"> File to upload</label> -->
       <input class="form-control-file" type="file" name="file">
       <input class="btn btn-primary" type=submit value=Upload name="_form_upload">
     </div>
@@ -23,24 +22,21 @@
   <form method="POST">
 
     {% for field in fields %}
-      <!-- <p>{{ field }}</p>
-      <p>{{ input(**field) }}</p> -->
-      {{ input(**field) }}
+      {{ input(requireds=requireds, **field) }}
     {% endfor %}
     <input class="btn btn-primary" type="submit" value="Submit" name="_form_metadata">
   </form>
 {% endblock %}
 
 
-{% macro input(name, value='', type='text', size=20, enum=None) -%}
-    <label for="{{ name }}">{{ name }}</label>
-    {% if type is equalto "number" %}
-      <input class="form-control"
-        type="{{ type }}" id="{{ name }}"
-        name="{{ name }}" value="{{ value|e|float }}"
-        size="{{ size }}"
-      >
-    {% elif enum is iterable %}
+{% macro input(name, value='', type='text', size=20, enum=None, description=None, requireds=None) -%}
+    <label for="{{ name }}">
+      {{ name|replace("_"," ")|capitalize }}
+      {% if requires is iterable and name in requireds %}
+        <sup><small>(required)</small></sup>
+      {% endif %}
+    </label>
+    {% if enum is iterable %}
       <select class="form-control" name="{{ name }}" id="{{ name }}">
         {% for item in enum %}
           <option value="{{ item }}">{{ item }}</option>
@@ -49,7 +45,12 @@
     {% else %}
       <input class="form-control"
         type="{{ type }}" id="{{ name }}"
-        name="{{ name }}" value="{{ value|e }}"
+        name="{{ name }}"
+        {% if type is equalto "number" %}
+          value="{{ value|e|float }}"
+        {% else %}
+          value="{{ value|e }}"
+        {% endif %}
         size="{{ size }}"
       >
     {% endif %}

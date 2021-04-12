@@ -106,4 +106,6 @@ def render(metadata=None, files=None):
         if 'enum' in params:
             _v['enum'] = params['enum']
         values.append(_v)
-    return render_template('blog/create.html', fields=values, files=files)
+
+    _requireds = _schema['required'] if 'required' in _schema else None
+    return render_template('blog/create.html', fields=values, files=files, requireds=_requireds)
