@@ -97,15 +97,16 @@ def render(metadata=None, files=None):
     if not 'properties' in _schema:
         return f"Schema is not valid: '{_schema}'"
 
-    values = []
-    for name,params in _schema['properties'].items():
-        _v = {"name": name}
-        _v['type'] = params['type']
-        if metadata and name in metadata:
-            _v['value'] = metadata[name]
-        if 'enum' in params:
-            _v['enum'] = params['enum']
-        values.append(_v)
-
-    _requireds = _schema['required'] if 'required' in _schema else None
-    return render_template('blog/create.html', fields=values, files=files, requireds=_requireds)
+    # values = []
+    # for name,params in _schema['properties'].items():
+    #     _v = {"name": name}
+    #     _v['type'] = params['type']
+    #     if metadata and name in metadata:
+    #         _v['value'] = metadata[name]
+    #     if 'enum' in params:
+    #         _v['enum'] = params['enum']
+    #     values.append(_v)
+    #
+    # _requireds = _schema['required'] if 'required' in _schema else None
+    # return render_template('blog/create.html', fields=values, files=files, requireds=_requireds)
+    return render_template('blog/create_hard.html', fields=metadata, files=files)

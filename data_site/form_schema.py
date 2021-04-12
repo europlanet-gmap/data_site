@@ -87,7 +87,7 @@ schema = {
         "description": {
             "type": "string"
         },
-        "relared_products": {
+        "related_products": {
             "type": "string"
         },
         "units_definition": {
