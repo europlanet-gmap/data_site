@@ -1,3 +1,5 @@
+
+
 # GMAP data submission
 
 This repository host the code for the data-submission website.
@@ -8,6 +10,16 @@ Is is built with Python Flask, and provides a form based on a Meta JSON file.
 The backend being Python eases the integration between frontend and the backend
 tools we already have built.
 
+
+## Important notes
+- we now use bootstrap-flask for managing boostrap (this changes the templates also)
+- to handle changes in the structure of the DB we now use [migrate](https://github.com/miguelgrinberg/Flask-Migrate). If the models were changed we need to:
+
+```
+$ flask db init [first time user]
+$ flask db migrate
+$ flask db upgrade
+```
 
 ## Run in development mode
 

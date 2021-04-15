@@ -73,7 +73,7 @@ def validate(form_data, errors=None):
     if _vout:
         if errors is not None and isinstance(errors, list):
             for _err in _vout:
-                prop = list(_err.path)[0]
+                prop = list(_err.path)
                 msg = _err.message
                 errors.append(f"{prop} : {msg}")
         return False

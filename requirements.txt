@@ -12,3 +12,4 @@ six==1.15.0
 watchdog==2.0.2
 Werkzeug==1.0.1
 bootstrap-flask
+flask-migrate

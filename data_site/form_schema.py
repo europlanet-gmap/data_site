@@ -9,8 +9,7 @@ schema = {
     "required": [
         "target_body",
         "gmap_id",
-        "map_type",
-        "cname"
+        "map_type"
     ],
 
     "type": "object",

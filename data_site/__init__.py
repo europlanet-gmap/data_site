@@ -6,17 +6,20 @@ from flask import render_template
 from flask_login import LoginManager
 from flask_sqlalchemy import SQLAlchemy
 from flask_bootstrap import Bootstrap
+from flask_migrate import Migrate
+
 
 db_name = "database.sqlite"
 
 db = SQLAlchemy()
 bootstrap = Bootstrap()
-
+migrate = Migrate()
 
 def create_app(test_config=None):
     # create and configure the app
     app = Flask(__name__, instance_relative_config=True)
     bootstrap.init_app(app)
+
 
 
     db_path = os.path.join(app.instance_path, 'data_site.sqlite')
@@ -27,6 +30,8 @@ def create_app(test_config=None):
         SQLALCHEMY_DATABASE_URI= f"sqlite:///{db_name}")
 
     db.init_app(app)
+
+    migrate.init_app(app, db)
 
 
     if test_config is None:
@@ -82,3 +87,4 @@ def create_database(app):
     if not Path(app.config["DATABASE_PATH"]).exists():
         db.create_all(app=app)
         print('Created Database!')
+

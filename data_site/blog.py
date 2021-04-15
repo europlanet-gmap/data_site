@@ -4,13 +4,14 @@ from flask import (
     Blueprint, flash, g, redirect, render_template, request, url_for,
     current_app
 )
+from flask_login import current_user
 
 from werkzeug.exceptions import abort
 from werkzeug.utils import secure_filename
 from . import db
 from data_site.auth import login_required
 from data_site import form
-
+from .models import DataPackage
 
 bp = Blueprint('blog', __name__)
 
@@ -23,7 +24,10 @@ def index():
     #     ' FROM post p JOIN user u ON p.author_id = u.id'
     #     ' ORDER BY created DESC'
     # ).fetchall()
-    return render_template('blog/index.html')
+
+    packs = DataPackage.query
+
+    return render_template('blog/index.html', packages=packs)
 
 
 @bp.route('/create', methods=('GET', 'POST'))
@@ -39,24 +43,34 @@ def create(values={'files':None, 'metadata':None}):
             errors = []
             try:
                 form_parsed = form.parse(_form)
+                print(form_parsed)
                 form_ok = form.validate(form_parsed, errors)
+                print(f"Form ok {form_ok}")
             except Exception as err:
                 raise err
             else:
                 values['metadata'] = form_parsed
-            if not form_ok:
+            if  form_ok is not None:
                 assert errors, errors
                 [ flash(e) for e in errors ]
             else:
                 flash('success')
-                db = get_db()
-                db.execute(
-                    'INSERT INTO post (title, body, author_id)'
-                    ' VALUES (?, ?, ?)',
-                    (title, body, g.user['id'])
-                )
-                db.commit()
-                return redirect(url_for('blog.index'))
+
+                from .models import DataPackage
+
+                pack = DataPackage(name=form_parsed["gmap_id"], creator_id=current_user.id)
+                from . import db
+                db.session.add(pack)
+                db.session.commit()
+
+                # db = get_db()
+                # db.execute(
+                #     'INSERT INTO post (title, body, author_id)'
+                #     ' VALUES (?, ?, ?)',
+                #     (title, body, g.user['id'])
+                # )
+                # db.commit()
+                return redirect(url_for('index'))
         else:
             assert '_form_upload' in request.form
             # _form = request.form.copy()
