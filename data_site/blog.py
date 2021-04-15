@@ -7,9 +7,8 @@ from flask import (
 
 from werkzeug.exceptions import abort
 from werkzeug.utils import secure_filename
-
+from . import db
 from data_site.auth import login_required
-from data_site.db import get_db
 from data_site import form
 
 
@@ -18,13 +17,13 @@ bp = Blueprint('blog', __name__)
 
 @bp.route('/')
 def index():
-    db = get_db()
-    posts = db.execute(
-        'SELECT p.id, title, body, created, author_id, username'
-        ' FROM post p JOIN user u ON p.author_id = u.id'
-        ' ORDER BY created DESC'
-    ).fetchall()
-    return render_template('blog/index.html', posts=posts)
+    # db = get_db()
+    # posts = db.execute(
+    #     'SELECT p.id, title, body, created, author_id, username'
+    #     ' FROM post p JOIN user u ON p.author_id = u.id'
+    #     ' ORDER BY created DESC'
+    # ).fetchall()
+    return render_template('blog/index.html')
 
 
 @bp.route('/create', methods=('GET', 'POST'))

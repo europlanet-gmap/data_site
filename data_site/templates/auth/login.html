@@ -1,15 +1,27 @@
 {% extends 'base.html' %}
+{% from 'bootstrap/form.html' import render_form %}
 
 {% block header %}
-  <h1>{% block title %}Log In{% endblock %}</h1>
+  <h1>{% block title %}LogIn{% endblock %}</h1>
 {% endblock %}
 
 {% block content %}
-  <form method="post">
-    <label for="username">Username</label>
-    <input name="username" id="username" required>
-    <label for="password">Password</label>
-    <input type="password" name="password" id="password" required>
-    <input type="submit" value="Log In">
-  </form>
+ <div class="jumbotron">
+        <div class="row">
+{#            <div class="col-md-8">#}
+{#                <img src="{{ url_for('static', filename='images/index.jpg') }}" class="rounded img-fluid">#}
+{#            </div>#}
+            <div class="col-md-4">
+                <div class="card mb-3 w-100 bg-light">
+                    <div class="card-header"><h4>Login</h4></div>
+                    <div class="card-body">
+                        {{ render_form(form) }}
+                        <hr>
+                        <p class="small"><a href="{{ url_for('.register') }}">Register new account</a></p>
+{#                        <p class="small"><a href="{{ url_for('.forget_password') }}">Forget password</a></p>#}
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
 {% endblock %}
