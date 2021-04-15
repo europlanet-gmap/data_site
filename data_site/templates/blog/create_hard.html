@@ -3,109 +3,126 @@
 {% block title %}Submit form{% endblock %}
 
 {% block content %}
-
+<div class="col">
   <!-- File upload -->
-  <h1>Upload new File</h1>
-  <form method=post enctype=multipart/form-data>
-    {% if files is not none %}
-    <ul>
-      {% for filename in files %}
+  <h2>Data</h2>
+  <div class="card card-body">
+    <form method=post enctype=multipart/form-data>
+      {% if files is not none %}
+      <ul>
+        {% for filename in files %}
         <li>{{ filename }}</li>
-      {% endfor %}
-    </ul>
-    {% endif %}
-    <div class="form-group">
-      <input class="form-control-file" type="file" name="file">
-      <input class="btn btn-primary" type=submit value=Upload name="_form_upload">
-    </div>
-  </form>
+        {% endfor %}
+      </ul>
+      {% endif %}
+      <div class="form-group">
+        <input class="form-control-file" type="file" name="file">
+        <input class="btn btn-primary" type=submit value=Upload name="_form_upload">
+      </div>
+    </form>
+  </div>
 
   <!-- Metadata form -->
-  <h1>Metadata form</h1>
+  <h2>Metadata</h2>
   <form method="POST">
 
     <div class="card card-body">
 
       <div class="row">
+
         <div class="col">
-          <label for="title">
+          <!-- <label for="title">
             Title
           </label>
-          <input class="form-control"
-            type="string" id="title"
-            name="title"
-            value="{{ fields.title }}"
-          >
-        </div>
-
-        <div class="col"
-          <div class="row">
-            <label>
-              Target body
+          <input class="form-control" type="string" id="title" name="title" value="{{ fields.title }}"> -->
+          <div class="form-group">
+            <label for="name">
+              Name
             </label>
-            <div class="col">
-              <div class="form-check">
-                <input class="form-check-input"
-                  type="radio" id="target_body_mars"
-                  name="target_body"
-                  value="mars"
-                  {% if fields.target_body is equalto "mars" %}checked{% endif %}
-                >
-                <label class="form-check-label" for="target_body_mars">
-                  Mars
-                </label>
-              </div>
-              <div class="form-check">
-                <input class="form-check-input"
-                  type="radio" id="target_body_mercury"
-                  name="target_body"
-                  value="mercury"
-                  {% if fields.target_body is equalto "mercury" %}checked{% endif %}
-                >
-                <label class="form-check-label" for="target_body_mercury">
-                  Mercury
-                </label>
-              </div>
-              <div class="form-check">
-                <input class="form-check-input"
-                  type="radio" id="target_body_moon"
-                  name="target_body"
-                  value="moon"
-                  {% if fields.target_body is equalto "moon" %}checked{% endif %}
-                >
-                <label class="form-check-label" for="target_body_moon">
-                  Moon
-                </label>
-              </div>
-            </div>
+            <input class="form-control" type="text"
+              id="name" name="name" value="{{ fields.name }}"
+              oninput="replaceInputWhitespaces(event)"
+              onchange="updateGmapID()"
+              >
+          </div>
+
+          <div class="form-group">
+            <label for="gmap_id">
+              Gmap ID
+            </label>
+            <input class="form-control" type="string"
+              id="gmap_id" name="gmap_id" value="{{ fields.gmap_id }}"
+              readonly
+              >
           </div>
         </div>
 
-        <label for="aims">
-          Aims
-        </label>
-        <input class="form-control"
-          type="string" id="aims"
-          name="aims"
-          value="{{ fields.aims }}"
-        >
-      </div>
-    </div>
+        <div class="col">
+          <div class="form-group">
+            <label for="target_body">
+              Target body
+            </label>
+            <select class="form-control"
+              name="target_body" id="target_body"
+              onchange="updateGmapID()">
+              <option value="mars" {% if fields.target_body is equalto "mars" %}selected{% endif %}>
+                Mars
+              </option>
+              <option value="mercury" {% if fields.target_body is equalto "mercury" %}selected{% endif %}>
+                Mercury
+              </option>
+              <option value="moon" {% if fields.target_body is equalto "moon" %}selected{% endif %}>
+                Moon
+              </option>
+            </select>
+          </div>
 
-    <label for="description">
+          <div class="form-group">
+            <label for="map_type">
+              Map type
+            </label>
+            <!-- <input class="form-control" type="string"
+              id="map_type" name="map_type"
+              value="{{ fields.map_type }}"
+              onchange="updateGmapID()"
+              > -->
+            <select class="form-control" multiple
+              name="map_type" id="map_type"
+              onchange="updateGmapID()">
+              <option value="compositional">
+                Compositional
+              </option>
+              <option value="morpho">
+                Morpho
+              </option>
+              <option value="stratigraphic">
+                Stratigraphic
+              </option>
+            </select>
+          </div>
+        </div>
+      </div>
+
+      <label for="aims">
+        Aims
+      </label>
+      <input class="form-control" type="string" id="aims" name="aims" value="{{ fields.aims }}">
+      <!-- </div> -->
+
+      <!-- <h5 for="description">
       Description
-    </label>
+    </h5>
     <textarea class="form-control"
       id="description"
       name="description"
       value="{{ fields.description }}"
       rows="3"
-    ></textarea>
+    ></textarea> -->
 
-    <div class="card card-body">
-      <label>
+      <!-- <div class="card card-body"> -->
+      <h5>
         Bounding-box
-      </label>
+      </h5>
       <div class="card card-body">
         <div class="row">
           <div class="col">
@@ -117,21 +134,13 @@
                 <label for="lon_west">
                   West
                 </label>
-                <input class="form-control"
-                  type="number" id="lon_west"
-                  name="lon_west"
-                  value="{{ fields.lon_west }}"
-                >
+                <input class="form-control" type="number" id="lon_west" name="lon_west" value="{{ fields.lon_west }}">
               </div>
               <div class="col">
                 <label for="lon_east">
                   East
                 </label>
-                <input class="form-control"
-                  type="number" id="lon_east"
-                  name="lon_east"
-                  value="{{ fields.lon_east }}"
-                >
+                <input class="form-control" type="number" id="lon_east" name="lon_east" value="{{ fields.lon_east }}">
               </div>
             </div>
           </div>
@@ -145,21 +154,13 @@
                 <label for="lat_min">
                   Min
                 </label>
-                <input class="form-control"
-                  type="number" id="lat_min"
-                  name="lat_min"
-                  value="{{ fields.lat_min }}"
-                >
+                <input class="form-control" type="number" id="lat_min" name="lat_min" value="{{ fields.lat_min }}">
               </div>
               <div class="col">
                 <label for="lat_max">
                   Max
                 </label>
-                <input class="form-control"
-                  type="number" id="lat_max"
-                  name="lat_max"
-                  value="{{ fields.lat_max }}"
-                >
+                <input class="form-control" type="number" id="lat_max" name="lat_max" value="{{ fields.lat_max }}">
               </div>
             </div>
           </div>
@@ -168,154 +169,103 @@
     </div>
 
     <p>
-      <button class="btn btn-secondary" type="button"
-        data-toggle="collapse" data-target="#collapseExtra"
-        aria-expanded="false" aria-controls="collapseExtra"
-      >
+      <button class="btn btn-secondary" type="button" data-toggle="collapse" data-target="#collapseExtra" aria-expanded="false" aria-controls="collapseExtra">
         Extra attributes
       </button>
     </p>
     <div class="collapse" id="collapseExtra">
-      <div class="card card-body"
+      <div class="card card-body">
         <label for="crs">
           CRS (original/data)
         </label>
-        <input class="form-control"
-          type="string" id="crs"
-          name="crs"
-          value="{{ fields.crs }}"
-        >
-
-        <label for="gmap_id">
-          Gmap id
-        </label>
-        <input class="form-control"
-          type="string" id="gmap_id"
-          name="gmap_id"
-          value="{{ fields.gmap_id }}"
-          size="20"
-        >
-
-        <label for="map_type">
-          Map type
-        </label>
-        <input class="form-control"
-          type="string" id="map_type"
-          name="map_type"
-          value="{{ fields.map_type }}"
-        >
+        <input class="form-control" type="string" id="crs" name="crs" value="{{ fields.crs }}">
 
         <label for="output_scale">
           Output scale
         </label>
-        <input class="form-control"
-          type="string" id="output_scale"
-          name="output_scale"
-          value="{{ fields.output_scale }}"
-        >
+        <input class="form-control" type="string" id="output_scale" name="output_scale" value="{{ fields.output_scale }}">
 
         <label for="authors">
           Authors
         </label>
-        <input class="form-control"
-          type="string" id="authors"
-          name="authors"
-          value="{{ fields.authors }}"
-        >
+        <input class="form-control" type="string" id="authors" name="authors" value="{{ fields.authors }}">
 
         <label for="source_data">
           Source data
         </label>
-        <input class="form-control"
-          type="string" id="source_data"
-          name="source_data"
-          value="{{ fields.source_data }}"
-        >
+        <input class="form-control" type="string" id="source_data" name="source_data" value="{{ fields.source_data }}">
 
         <label for="standards">
           Standards
         </label>
-        <input class="form-control"
-          type="string" id="standards"
-          name="standards"
-          value="{{ fields.standards }}"
-        >
+        <input class="form-control" type="string" id="standards" name="standards" value="{{ fields.standards }}">
 
         <label for="doi">
           Doi
         </label>
-        <input class="form-control"
-          type="string" id="doi"
-          name="doi"
-          value="{{ fields.doi }}"
-        >
+        <input class="form-control" type="string" id="doi" name="doi" value="{{ fields.doi }}">
 
         <label for="references">
           References
         </label>
-        <input class="form-control"
-          type="string" id="references"
-          name="references"
-          value="{{ fields.references }}"
-        >
+        <input class="form-control" type="string" id="references" name="references" value="{{ fields.references }}">
 
         <label for="related_products">
           Related products
         </label>
-        <input class="form-control"
-          type="string" id="related_products"
-          name="related_products"
-          value="{{ fields.related_products }}"
-        >
+        <input class="form-control" type="string" id="related_products" name="related_products" value="{{ fields.related_products }}">
 
         <label for="units_definition">
           Units definition
         </label>
-        <input class="form-control"
-          type="string" id="units_definition"
-          name="units_definition"
-          value="{{ fields.units_definition }}"
-        >
+        <input class="form-control" type="string" id="units_definition" name="units_definition" value="{{ fields.units_definition }}">
 
         <label for="stratigraphic_info">
           Stratigraphic info
         </label>
-        <input class="form-control"
-          type="string" id="stratigraphic_info"
-          name="stratigraphic_info"
-          value="{{ fields.stratigraphic_info }}"
-        >
+        <input class="form-control" type="string" id="stratigraphic_info" name="stratigraphic_info" value="{{ fields.stratigraphic_info }}">
 
         <label for="comments">
           Comments
         </label>
-        <input class="form-control"
-          type="string" id="comments"
-          name="comments"
-          value="{{ fields.comments }}"
-        >
+        <input class="form-control" type="string" id="comments" name="comments" value="{{ fields.comments }}">
 
         <label for="heritage">
           Heritage
         </label>
-        <input class="form-control"
-          type="string" id="heritage"
-          name="heritage"
-          value="{{ fields.heritage }}"
-        >
+        <input class="form-control" type="string" id="heritage" name="heritage" value="{{ fields.heritage }}">
 
         <label for="acknowlegments">
           Acknowlegments
         </label>
-        <input class="form-control"
-          type="string" id="acknowlegments"
-          name="acknowlegments"
-          value="{{ fields.acknowlegments }}"
-        >
+        <input class="form-control" type="string" id="acknowlegments" name="acknowlegments" value="{{ fields.acknowlegments }}">
       </div>
     </div>
 
     <input class="btn btn-primary" type="submit" value="Submit" name="_form_metadata">
   </form>
-
+</div>
 {% endblock content %}
+
+{% block scripts %}
+{{ super() }}
+<script>
+  function replaceInputWhitespaces(e) {
+    const elem = e.currentTarget;
+    const value = elem.value.toLowerCase().replace(" ","-");
+    if (value != elem.value) {
+      console.log(`NAME value replaced: ${value},${elem.value}`);
+      elem.value = value;
+    }
+  }
+  function updateGmapID() {
+    const body = document.getElementById("target_body").value;
+    const _types = document.getElementById("map_type").selectedOptions;
+    // const type = Array.from(_types).map(val => val.charAt(0)).sort().join();
+    const type = Array.from(_types).map(({value}) => value.charAt(0)).sort().join("");
+    const name = document.getElementById("name").value;
+    const v_id = `GM_${body}_${type}_${name}`;
+    document.getElementById("gmap_id").value = v_id;
+  }
+</script>
+{% endblock scripts %}
