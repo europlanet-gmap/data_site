@@ -7,13 +7,10 @@ schema = {
     "description": "GMAP data packages are summarized by a set of metadata, defined here.",
 
     "required": [
-        "lat_min",
-        "lon_west",
-        "lat_max",
-        "lon_east",
         "target_body",
         "gmap_id",
-        "crs"
+        "map_type",
+        "cname"
     ],
 
     "type": "object",
@@ -21,6 +18,10 @@ schema = {
     "properties": {
 
         "gmap_id": {
+            "type": "string",
+            "minLength": 2
+        },
+        "name": {
             "type": "string",
             "minLength": 2
         },
