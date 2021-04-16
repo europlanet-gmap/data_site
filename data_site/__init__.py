@@ -8,19 +8,20 @@ from flask_sqlalchemy import SQLAlchemy
 from flask_bootstrap import Bootstrap
 from flask_migrate import Migrate
 
-
+from flask_babel import Babel
 db_name = "database.sqlite"
 
 db = SQLAlchemy()
 bootstrap = Bootstrap()
 migrate = Migrate()
+babel = Babel()
 
 def create_app(test_config=None):
     # create and configure the app
     app = Flask(__name__, instance_relative_config=True)
     bootstrap.init_app(app)
 
-
+    babel.init_app(app)
 
     db_path = os.path.join(app.instance_path, 'data_site.sqlite')
 

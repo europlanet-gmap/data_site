@@ -1,28 +1,19 @@
 {% extends 'base.html' %}
+{% from 'bootstrap/table.html' import render_table %}
+
 
 {% block header %}
-  <h1>{% block title %}Posts{% endblock %}</h1>
-{#  {% if current_user %}#}
-{#    <a class="action" href="{{ url_for('blog.create') }}">New</a>#}
-{#  {% endif %}#}
+    <h1>{% block title %}Data Packages{% endblock %}</h1>
+    {#  {% if current_user %}#}
+    {#    <a class="action" href="{{ url_for('blog.create') }}">New</a>#}
+    {#  {% endif %}#}
 {% endblock %}
 
 {% block content %}
-  {% for pack in packages %}
-    <article class="post">
-      <header>
-        <div>
-          <h1>{{ pack.name  }}</h1>
-          <div class="about">by {{ pack.creator_id }} on {{ pack.creation_date.strftime('%Y-%m-%d') }}</div>
-        </div>
-        {% if current_user.id == pack.creator_id %}
-          <a class="action" href="{{ url_for('blog.update', id=pack.id) }}">Edit</a>
-        {% endif %}
-      </header>
-      <p class="body">{{ pack.body }}</p>
-    </article>
-    {% if not loop.last %}
-      <hr>
-    {% endif %}
-  {% endfor %}
+    <div style="margin-left:5%; margin-right: 5%; margin:2%">
+    {{ table }}
+    </div>
 {% endblock %}
+
+
+

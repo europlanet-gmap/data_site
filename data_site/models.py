@@ -10,6 +10,7 @@ class DataPackage(db.Model):
     name = db.Column(db.String(10000)) # package name, should be enough to find out the url for downloading the package
     creation_date = db.Column(db.DateTime(timezone=True), default=func.now())
     creator_id = db.Column(db.Integer, db.ForeignKey('user.id')) # user who created the dataset
+    creator = db.relationship("User")
     body = db.Column(db.String(1500000))
 
 

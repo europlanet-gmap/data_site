@@ -73,7 +73,8 @@ def login():
 @login_required
 def logout():
     logout_user()
-    return redirect(url_for('auth.login'))
+    flash("Logged out", "info")
+    return redirect(url_for('blog.index'))
 
 
 # @auth.route('/register', methods=['GET', 'POST'])
