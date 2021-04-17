@@ -1,9 +1,8 @@
+{% from 'bootstrap/nav.html' import render_nav_item %}
+{%  from "bootstrap/utils.html" import render_icon %}
+
 <!doctype html>
 <html lang="en">
-
-
-
-
 
 <head>
     <meta charset="utf-8">
@@ -26,66 +25,72 @@
     <!-- <link href="form-validation.css" rel="stylesheet"> -->
 </head>
 
+
 <body class="bg-light">
 
-<nav class="navbar navbar-expand-lg navbar-dark bg-dark">
-    <button
-            class="navbar-toggler"
-            type="button"
-            data-toggle="collapse"
-            data-target="#navbar"
-    >
-        <span class="navbar-toggler-icon"></span>
-    </button>
-    <div class="collapse navbar-collapse" id="navbar">
-        <div class="navbar-nav">
-            <a class="nav-item nav-link" id="home" href="/">Home</a>
-            {% if current_user.is_authenticated %}
-                <a class="nav-item nav-link" id="create" href="/create">Create Package</a>
-                <a class="nav-item nav-link" id="logout" href="/logout">Logout</a>
-            {% else %}
-                <a class="nav-item nav-link" id="login" href="/login">Login</a>
-                <a class="nav-item nav-link" id="register" href="/register">Sign Up</a>
-            {% endif %}
+<nav class="navbar navbar-expand-lg navbar-light bg-light">
+    <div class="container">
+                <a class="navbar-brand" href="{{ url_for('blog.index') }}">
+                <img src="{{ url_for('static', filename='logo.svg') }}" alt="GMAP Data submission" width="150px">
+            </a>
+
+
+        <button
+                class="navbar-toggler"
+                type="button"
+                data-toggle="collapse"
+                data-target="#navbar"
+        >
+            <span class="navbar-toggler-icon"></span>
+        </button>
+
+        <div class="collapse navbar-collapse" id="navbar">
+            <div class="navbar-nav mr-auto">
+                {{ render_nav_item('index', 'Home') }}
+            </div>
+            <div class="navbar-nav ml-auto">
+                {% if not current_user.is_authenticated %}
+                    <a class="btn btn-outline-primary ml-2" href="{{ url_for('auth.login') }}">Login</a>
+                    <a class="btn btn-primary ml-2" href="{{ url_for('auth.register') }}">Register</a>
+                {% else %}
+                    <h6 class="dropdown-header"> Logged in as {{ current_user.username }} </h6>
+                    <a class="btn btn-outline-primary ml-2" href="{{ url_for('blog.create') }}"> {{ render_icon ("cloud-upload") }} New</a>
+                    <a class="btn btn-primary ml-2" href="{{ url_for('auth.logout') }}">Logout</a>&nbsp;&nbsp;
+                {% endif %}
+            </div>
         </div>
-    </div>
+      </div>
 </nav>
 
-<section class="content">
-    <header>
-        {% block header %}{% endblock %}
-    </header>
-
-
-    {% with messages = get_flashed_messages(with_categories=true) %} {% if
-    messages %} {% for category, message in messages %} {% if category ==
-    'error' %}
-        <div class="alert alert-danger alter-dismissable fade show" role="alert">
-            {{ message }}
-            <button type="button" class="close" data-dismiss="alert">
-                <span aria-hidden="true">&times;</span>
-            </button>
-        </div>
-    {% else %}
-        <div class="alert alert-success alter-dismissable fade show" role="alert">
-            {{ message }}
-            <button type="button" class="close" data-dismiss="alert">
-                <span aria-hidden="true">&times;</span>
-            </button>
-        </div>
-    {% endif %} {% endfor %} {% endif %} {% endwith %}
 
 
 
 
-    {#    CONTENT#}
-    {% block content %}{% endblock %}
+<main>
+    <div class="container">
+        {% for message in get_flashed_messages(with_categories=True) %}
+            <div class="alert alert-{{ message[0] }}">
+                <button type="button" class="close" data-dismiss="alert">&times;</button>
+                {{ message[1] }}
+            </div>
+        {% endfor %}
+        {% block content %}{% endblock %}
+        {% block footer %}
+            <footer>
+                <p class="float-left">
+                    <small>&copy; 2021
+                        <a href="https://europlanet-gmap.eu" title="GMAP">GMAP</a>
+                    </small>
+                </p>
+                <p class="float-right">
+                    <small>GMAP dataset upload</small>
+                </p>
+            </footer>
+        {% endblock %}
+    </div>
+</main>
 
 
-
-
-
-</section>
 <!-- <footer class="my-5 pt-5 text-muted text-center text-small">
     <p class="mb-1">&copy; 2017-2018 Company Name</p>
     <ul class="list-inline">
