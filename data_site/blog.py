@@ -16,16 +16,34 @@ from .models import DataPackage
 bp = Blueprint('blog', __name__)
 
 
-@bp.route('/')
+@bp.route('/', methods=["GET"])
 def index():
 
-    packs = DataPackage.query.all()
+    s = request.args.get('sort', 'id')
+    direction = request.args.get('direction', 'id')
+
+
+
+    # sort = creation_date & direction = asc
+    from sqlalchemy import asc, desc
+    if direction =="desc":
+        sf = desc
+    else:
+        sf = asc
+    packs = DataPackage.query.order_by(sf(s)).all()
 
     from .tables import PackageItemTable
+
+
     table = PackageItemTable(packs)
     print(table)
 
     return render_template('blog/index.html', table=table)
+
+@bp.route("/<int:id>/record")
+def view(id):
+    flash(f"This page must be implemented, but should show properties of package {id}")
+    return render_template("base.html")
 
 
 @bp.route('/create', methods=('GET', 'POST'))
@@ -112,7 +130,12 @@ def get_post(id, check_author=True):
 @bp.route('/<int:id>/update', methods=('GET', 'POST'))
 @login_required
 def update(id):
+    flash(f"Tring to modify package {id}", "info")
+    return redirect(url_for('blog.index'))
     post = get_post(id)
+
+
+
 
     if request.method == 'POST':
         title = request.form['title']
