@@ -30,9 +30,10 @@
 
 <nav class="navbar navbar-expand-lg navbar-light bg-light">
     <div class="container">
-                <a class="navbar-brand" href="{{ url_for('blog.index') }}">
+                <a class="navbar-brand" href="{{ url_for('main.index') }}">
                 <img src="{{ url_for('static', filename='logo.svg') }}" alt="GMAP Data submission" width="150px">
             </a>
+    <a class="btn btn-outline-primary ml-2" href="{{ url_for('packages.index') }}"> {{ render_icon ("archive") }}Packages</a>
 
 
         <button
@@ -54,7 +55,7 @@
                     <a class="btn btn-primary ml-2" href="{{ url_for('auth.register') }}">Register</a>
                 {% else %}
                     <h6 class="dropdown-header"> Logged in as {{ current_user.username }} </h6>
-                    <a class="btn btn-outline-primary ml-2" href="{{ url_for('blog.create') }}"> {{ render_icon ("cloud-upload") }} New</a>
+                    <a class="btn btn-outline-primary ml-2" href="{{ url_for('packages.create') }}"> {{ render_icon ("cloud-upload") }} New</a>
                     <a class="btn btn-primary ml-2" href="{{ url_for('auth.logout') }}">Logout</a>&nbsp;&nbsp;
                 {% endif %}
             </div>

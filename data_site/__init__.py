@@ -48,12 +48,14 @@ def create_app(test_config=None):
     except OSError:
         pass
 
+    from . import main
+    app.register_blueprint(main.main, url_prefix="/")
 
     from . import auth
     app.register_blueprint(auth.auth, url_prefix='/')
 
-    from . import blog
-    app.register_blueprint(blog.bp, url_prefix='/')
+    from . import packages
+    app.register_blueprint(packages.packages, url_prefix='/')
     app.add_url_rule('/', endpoint='index')
 
 

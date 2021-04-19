@@ -74,7 +74,7 @@ def login():
 def logout():
     logout_user()
     flash("Logged out", "info")
-    return redirect(url_for('blog.index'))
+    return redirect(url_for('packages.index'))
 
 
 # @auth.route('/register', methods=['GET', 'POST'])

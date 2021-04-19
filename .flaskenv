@@ -1,0 +1,2 @@
+FLASK_APP=data_site
+FLASK_ENV=development

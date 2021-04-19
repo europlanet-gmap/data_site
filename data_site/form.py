@@ -108,5 +108,5 @@ def render(metadata=None, files=None):
     #     values.append(_v)
     #
     # _requireds = _schema['required'] if 'required' in _schema else None
-    # return render_template('blog/create.html', fields=values, files=files, requireds=_requireds)
-    return render_template('blog/create_hard.html', fields=metadata, files=files)
+    # return render_template('packages/create.html', fields=values, files=files, requireds=_requireds)
+    return render_template('packages/create_hard.html', fields=metadata, files=files)

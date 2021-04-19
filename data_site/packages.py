@@ -13,10 +13,10 @@ from data_site.auth import login_required
 from data_site import form
 from .models import DataPackage
 
-bp = Blueprint('blog', __name__)
+packages = Blueprint('packages', __name__)
 
 
-@bp.route('/', methods=["GET"])
+@packages.route('/packages', methods=["GET"])
 def index():
 
     s = request.args.get('sort', 'id')
@@ -38,15 +38,15 @@ def index():
     table = PackageItemTable(packs)
     print(table)
 
-    return render_template('blog/index.html', table=table)
+    return render_template('packages/index.html', table=table)
 
-@bp.route("/<int:id>/record")
+@packages.route("/<int:id>/record")
 def view(id):
     flash(f"This page must be implemented, but should show properties of package {id}")
     return render_template("base.html")
 
 
-@bp.route('/create', methods=('GET', 'POST'))
+@packages.route('/create', methods=('GET', 'POST'))
 @login_required
 def create(values={'files':None, 'metadata':None}):
     if request.method == 'POST':
@@ -127,11 +127,11 @@ def get_post(id, check_author=True):
     return post
 
 
-@bp.route('/<int:id>/update', methods=('GET', 'POST'))
+@packages.route('/<int:id>/update', methods=('GET', 'POST'))
 @login_required
 def update(id):
     flash(f"Tring to modify package {id}", "info")
-    return redirect(url_for('blog.index'))
+    return redirect(url_for('packages.index'))
     post = get_post(id)
 
 
@@ -155,16 +155,16 @@ def update(id):
                 (title, body, id)
             )
             db.commit()
-            return redirect(url_for('blog.index'))
+            return redirect(url_for('packages.index'))
 
-    return render_template('blog/update.html', post=post)
+    return render_template('packages/update.html', post=post)
 
 
-@bp.route('/<int:id>/delete', methods=('POST',))
+@packages.route('/<int:id>/delete', methods=('POST',))
 @login_required
 def delete(id):
     get_post(id)
     db = get_db()
     db.execute('DELETE FROM post WHERE id = ?', (id,))
     db.commit()
-    return redirect(url_for('blog.index'))
+    return redirect(url_for('packages.index'))
