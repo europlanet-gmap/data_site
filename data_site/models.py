@@ -44,6 +44,7 @@ class DataPackage(db.Model):
     creator_id = db.Column(db.Integer, db.ForeignKey('user.id')) # user who created the dataset
     creator = db.relationship("User") # allows to access creator as an User instance
     body = db.Column(db.String(1500000))
+    planetary_body = db.Column(db.String(150), default="Unknown")
 
     @property
     def editable(self):

@@ -23,15 +23,12 @@ def import_planmap_packages():
         db.session.add(user)
         db.session.commit()
 
-
-
-
     for body in bodies:
         for map in body.maps:
             print(map.name)
 
 
-            p = DataPackage(name=map.name, creator_id=user.id)
+            p = DataPackage(name=map.name, creator_id=user.id, planetary_body=body.name, body=map.readme)
             db.session.add(p)
             db.session.commit()
 

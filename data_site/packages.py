@@ -5,6 +5,7 @@ from flask import (
     current_app
 )
 from flask_login import current_user
+from markupsafe import Markup
 
 from werkzeug.exceptions import abort
 from werkzeug.utils import secure_filename
@@ -42,8 +43,23 @@ def index():
 
 @packages.route("/<int:id>/record")
 def view(id):
-    flash(f"This page must be implemented, but should show properties of package {id}")
-    return render_template("base.html")
+
+    from .models import DataPackage
+
+    pack = DataPackage.query.filter_by(id=id).first()
+
+    from markdown import markdown
+
+    if pack.body is not None:
+        body = pack.body
+    else:
+        body = "# No description for this package"
+
+    ashtml = markdown(body, extensions=['tables'])
+    print(type(ashtml))
+
+
+    return render_template("packages/view.html", package_name=pack.name, description=Markup(ashtml))
 
 
 @packages.route('/create', methods=('GET', 'POST'))

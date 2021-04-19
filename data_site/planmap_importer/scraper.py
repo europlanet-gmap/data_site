@@ -19,6 +19,7 @@ class Product():
     name = attr.ib(None)
     url = attr.ib(None)
     all_docs = attr.ib(None)
+    readme = attr.ib(None)
     thumb = attr.ib(None)
     thumb_url = attr.ib(None)
 
@@ -35,7 +36,7 @@ def fetch_address(url):
     return soup
 
 
-def get_cleaned_links(soup, ignores=[]):
+def get_cleaned_links(soup, ignore=[]):
     found = soup.find_all(["a"], recursive=True)
 
     out = []
@@ -46,14 +47,15 @@ def get_cleaned_links(soup, ignores=[]):
             else:
                 name = f["href"]
             out.append(name)
+        # else:
+        #     print(f"discarded {f}")
+
 
     return out
 
 
-@memory.cache
+
 def fetch_maps():
-
-
     bb = []
     for body in bodies:
         b = Body()
@@ -98,6 +100,21 @@ def append_docs(bb):
             map.all_docs = links
     return bb
 
+def append_readme(bb):
+    for body in bb:
+        for map in body.maps:
+            docurl = map.url + "/"
+            soup = fetch_address(docurl)
+            links = get_cleaned_links(soup)
+            for ln in links:
+                # print(f" testing link {ln}")
+                if ln.lower().endswith("readme.md"):
+                    soup = fetch_address(map.url + "/" + ln)
+                    map.readme = soup.get_text()
+            map.all_docs = links
+    return bb
+
+
 
 # select proper thumbnails
 import re
@@ -130,11 +147,12 @@ def select_thumbnails(bb):
             map.thumb = found
 
     return bb
-
+@memory.cache
 def scrape_maps():
     bb = fetch_maps()
     compose_urls(bb)
     append_docs(bb)
+    append_readme(bb)
     select_thumbnails(bb)
 
     return bb

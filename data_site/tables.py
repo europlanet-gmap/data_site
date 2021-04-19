@@ -42,11 +42,13 @@ class PackageItemTable(Table):
     classes = ['table', "table-dark"]
 
     name = Col('Name')
+    planetary_body = Col("Body")
     creation_date = DateCol('Creation Date')
-    creator_id = Col('Creator')
-    creator = UserCol("User")
+    # creator_id = Col('Creator')
+    creator = UserCol("Creator")
     # allow_sort = True
     tools = ToolCol("Tools")
+
 
 
     # def __init__(self,  items):
