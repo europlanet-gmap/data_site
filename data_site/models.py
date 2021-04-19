@@ -45,6 +45,7 @@ class DataPackage(db.Model):
     creator = db.relationship("User") # allows to access creator as an User instance
     body = db.Column(db.String(1500000))
     planetary_body = db.Column(db.String(150), default="Unknown")
+    thumbnail_url =db.Column(db.String(1000))
 
     @property
     def editable(self):

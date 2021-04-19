@@ -111,7 +111,7 @@ def append_readme(bb):
                 if ln.lower().endswith("readme.md"):
                     soup = fetch_address(map.url + "/" + ln)
                     map.readme = soup.get_text()
-            map.all_docs = links
+            # map.all_docs = links
     return bb
 
 
@@ -139,7 +139,7 @@ def select_thumbnails(bb):
                     allpngs.append(doc)
 
             if not found:
-                print(f"Not found for {map.name}")
+                print(f"Thumb Not found for {map.name}")
                 if len(allpngs) > 0:
                     print(f"autoassign {allpngs[0]}")
                     found = allpngs[0]
@@ -147,12 +147,24 @@ def select_thumbnails(bb):
             map.thumb = found
 
     return bb
-@memory.cache
+
+
+def append_thumb_url(bb):
+    for body in bb:
+        for map in body.maps:
+            thumb = map.thumb
+            if thumb:
+                map.thumb_url = map.url + "/" + "document/" + thumb
+
+
+
+# @memory.cache
 def scrape_maps():
     bb = fetch_maps()
     compose_urls(bb)
     append_docs(bb)
     append_readme(bb)
     select_thumbnails(bb)
+    append_thumb_url(bb)
 
     return bb

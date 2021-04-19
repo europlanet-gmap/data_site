@@ -15,3 +15,18 @@ bootstrap-flask
 flask-migrate
 Flask-Babel
 Flask-Table
+python-dotenv
+flask-login
+flask-sqlalchemy
+bootstrap-flask
+flask-migrate
+flask-babel
+flask-wtf
+email-validator
+jsonschema
+# for the planmap importer
+requests
+bs4
+joblib
+html5lib
+markdown

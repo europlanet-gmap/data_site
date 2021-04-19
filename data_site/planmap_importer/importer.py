@@ -28,7 +28,9 @@ def import_planmap_packages():
             print(map.name)
 
 
-            p = DataPackage(name=map.name, creator_id=user.id, planetary_body=body.name, body=map.readme)
+            p = DataPackage(name=map.name, creator_id=user.id,
+                            planetary_body=body.name, body=map.readme,
+                            thumbnail_url=map.thumb_url)
             db.session.add(p)
             db.session.commit()
 
