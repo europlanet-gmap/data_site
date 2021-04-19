@@ -7,9 +7,11 @@ from flask_login import LoginManager
 from flask_sqlalchemy import SQLAlchemy
 from flask_bootstrap import Bootstrap
 from flask_migrate import Migrate
+from .planmap_importer import init_app
 
 from flask_babel import Babel
 db_name = "database.sqlite"
+
 
 db = SQLAlchemy()
 bootstrap = Bootstrap()
@@ -22,6 +24,11 @@ def create_app(test_config=None):
     bootstrap.init_app(app)
 
     babel.init_app(app)
+
+
+    init_app(app)
+
+
 
     db_path = os.path.join(app.instance_path, 'data_site.sqlite')
 

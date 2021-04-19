@@ -24,10 +24,27 @@ $ flask db upgrade
 ## Run in development mode
 
 ```bash
-$ export FLASK_APP=app.py
-$ export FLASK_ENV=development
 $ flask run
 ```
+
+
+## Dirty planmap dataset importer
+The importer scrapes data.planmap to import dataset
+
+Example:
+```bash
+flask import-planmap
+```
+
+to delete all planmap packages:
+```bash
+flask remove-planmap
+```
+
+- A new user "planmap-heritage" is automatically creater the first time
+- A dummy pasword is set for the planmap-heritage user
+
+
 
 
 # TODO
