@@ -7,8 +7,8 @@ from flask_login import LoginManager
 from flask_sqlalchemy import SQLAlchemy
 from flask_bootstrap import Bootstrap
 from flask_migrate import Migrate
-from .planmap_importer import init_app
-
+from .planmap_importer import init_app as planmap_importer_init
+# import planmap_importer
 from flask_babel import Babel
 db_name = "database.sqlite"
 
@@ -26,7 +26,7 @@ def create_app(test_config=None):
     babel.init_app(app)
 
 
-    init_app(app)
+    planmap_importer_init(app)
 
 
 
