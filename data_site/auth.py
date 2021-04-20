@@ -1,3 +1,5 @@
+import click
+
 from flask import Blueprint, render_template, request, flash, redirect, url_for
 
 from .forms import RegisterForm, LoginForm
@@ -131,3 +133,54 @@ def register():
 
 
     return render_template('auth/register.html', form=form)
+
+
+
+
+
+def generate_random_pass(n=6):
+    """
+    from https://stackoverflow.com/questions/65689199/how-to-generate-random-password-in-python
+    :param n:
+    :return: a random pass
+    """
+    import string
+    import random
+
+    symbols = [';', '.', '!', '(', ')']  # Can add more
+
+    password = ""
+    for _ in range(n):
+        password += random.choice(string.ascii_lowercase)
+    password += random.choice(string.ascii_uppercase)
+    password += random.choice(string.digits)
+    password += random.choice(symbols)
+    return password
+
+# TO BE IMPLEMENTED
+# @auth.cli.command('create')
+# @click.argument('name')
+# def create(name):
+#     print(f"creating user {name}")
+
+@auth.cli.command('random_passwd')
+@click.argument('name')
+def set_random_password(name):
+    """
+    A quick reset password, useful for development
+    :param name:
+    :return:
+    """
+    print(f"Setting random password for user {name}")
+
+    user = User.query.filter_by(username=name).first()
+    if user is None:
+        print(f"User {name} do not exists")
+        return
+
+    password = generate_random_pass()
+
+    user.set_password(password)
+    db.session.commit()
+
+    print(f"new password for user {user.username} [{user.email}]: {password}")
