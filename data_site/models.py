@@ -44,6 +44,7 @@ class DataPackage(db.Model):
     creator_id = db.Column(db.Integer, db.ForeignKey('user.id')) # user who created the dataset
     creator = db.relationship("User") # allows to access creator as an User instance
     body = db.Column(db.String(1500000))
+    # body_format = db.Column(db.String(20), default=None) # format of 'body' content, this will be used for rendering it
     planetary_body = db.Column(db.String(150), default="Unknown")
     thumbnail_url =db.Column(db.String(1000))
 
