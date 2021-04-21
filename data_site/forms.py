@@ -14,7 +14,8 @@ from wtforms.validators import (
     Email,
     EqualTo,
     Length,
-    Regexp
+    Regexp,
+    Optional
     )
 
 from .models import User
