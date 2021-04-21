@@ -32,6 +32,8 @@ bs4 = "*"
 joblib = "*"
 html5lib = "*"
 markdown = "*"
+flask-paginate = "*"
+
 
 [dev-packages]
 

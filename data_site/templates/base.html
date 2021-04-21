@@ -46,7 +46,7 @@
         <a class="navbar-brand" href="{{ url_for('main.index') }}">
             <img src="{{ url_for('static', filename='logo.svg') }}" alt="GMAP Data submission" width="150px">
         </a>
-        <a class="btn btn-outline-primary ml-2" href="{{ url_for('packages.index') }}"> {{ render_icon ("archive") }}Packages</a>
+        <a class="btn btn-outline-primary ml-2" href="{{ url_for('packages.all_packages') }}"> {{ render_icon ("archive") }}Packages</a>
 
 
         <button

@@ -1,0 +1,72 @@
+{% extends 'base.html' %}
+{% from 'bootstrap/form.html' import render_form %}
+
+{% block title %}
+    Package search
+{%  endblock %}
+
+{% block content %}
+
+    <div class="jumbotron text-center">
+        <div class="container mt-5">
+            <h2 class="jumbotron-heading"> Package search </h2>
+            <p class="lead text-muted" > Search GMAP packages</p>
+
+            {#            <p>#}
+            {#                <a href="/packages" class="btn btn-primary my-2">Browse all packages</a>#}
+            {#            </p>#}
+
+
+        </div>
+
+
+    </div>
+    <div class="wrapper text-center">
+
+        <form action="." method="post">
+            <div class="btn-group">
+                {{ search_form.csrf_token }}
+                {{ search_form.query(style="width:350px") }}
+                {{ search_form.body() }}
+                {{ search_form.creator() }}
+                {{ search_form.submit() }}
+            </div>
+        </form>
+
+        {#
+{#        </div>#}
+    </div>
+
+
+    {#<div class="row">#}
+    {#      <div class="col">left</div>#}
+    {#      <div class="col">#}
+    {#          <div class="float-right">element needs to be right aligned</div>#}
+    {#      </div>#}
+    {#</div>#}
+    <p>
+        {{ pagination.links }}
+    </p>
+    <div class="container">
+
+        <div class="album py-5 bg-light">
+
+            <div class="row">
+                {% if packages | count == 0 %}
+                    No results
+            {% else %}
+                {% for pack in packages %}
+                    {% include "packages/package_card.html" %}
+                {% endfor %}
+            {% endif %}
+
+            </div>
+
+
+
+
+            {{ pagination.links }}
+        </div>
+
+    </div>
+{% endblock %}

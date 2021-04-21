@@ -1,0 +1,29 @@
+<div class="col-md-{{ spanning }}">
+    <div class="card mb-4 shadow-sm">
+
+        <img class="card-img"
+             alt="Thumbnail [100%x225]"
+             style="height: 225px; width: 100%; display: block; object-fit: cover;"
+             src="{{ pack.thumbnail_url }}"
+             data-holder-rendered="true">
+
+        <div class="card-body">
+            <p class="card-text mb-2">
+                {{ pack.name }}
+            </p>
+
+            <div class="d-flex justify-content-between align-items-center">
+                <div class="btn-group">
+                    <a class="btn btn-sm btn-outline-secondary" href="/{{pack.id}}/record"> View</a>
+                </div>
+
+                <div>
+
+                    <small class="text-muted">{{  pack.creation_date  }}</small> <br>
+                    <small class="text-muted">@{{  pack.creator.username  }}</small>
+                </div>
+            </div>
+        </div>
+    </div>
+
+</div>
