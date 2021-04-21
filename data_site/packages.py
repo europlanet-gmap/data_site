@@ -1,32 +1,37 @@
 import os
 
 from flask import (
-    Blueprint, flash, g, redirect, render_template, request, url_for,
-    current_app
+    Blueprint,
+    current_app,
+    flash,
+    g,
+    redirect,
+    render_template,
+    request,
+    url_for,
 )
+
 from flask_login import current_user
+
 from markupsafe import Markup
+from markdown import markdown
 
 from werkzeug.exceptions import abort
 from werkzeug.utils import secure_filename
-from . import db
-from data_site.auth import login_required
-from data_site import form
-from .models import DataPackage
 
-from .forms import PackageForm
+from data_site import db, form
+from data_site.auth import login_required
+from data_site.forms import PackageForm
+from data_site.models import DataPackage
+
 
 packages = Blueprint('packages', __name__)
 
 
 @packages.route('/packages', methods=["GET"])
 def index():
-
     s = request.args.get('sort', 'id')
     direction = request.args.get('direction', 'id')
-
-
-
     # sort = creation_date & direction = asc
     from sqlalchemy import asc, desc
     if direction =="desc":
@@ -35,22 +40,15 @@ def index():
         sf = asc
     packs = DataPackage.query.order_by(sf(s)).all()
 
-    from .tables import PackageItemTable
-
-
+    from data_site.tables import PackageItemTable
     table = PackageItemTable(packs)
-    print(table)
 
     return render_template('packages/index.html', table=table)
 
+
 @packages.route("/<int:id>/record")
 def view(id):
-
-    from .models import DataPackage
-
     pack = DataPackage.query.filter_by(id=id).first()
-
-    from markdown import markdown
 
     if pack.body is not None:
         body = pack.body
@@ -58,8 +56,6 @@ def view(id):
         body = "# No description for this package"
 
     ashtml = markdown(body, extensions=['tables'])
-    print(type(ashtml))
-
 
     return render_template("packages/view.html", package_name=pack.name, description=Markup(ashtml))
 
@@ -129,6 +125,18 @@ def create(values={'files':None, 'metadata':None}):
     form = PackageForm()
     if request.method == 'GET':
         return render_template('packages/create.html', form=form)
+    if request.method == 'POST':
+        if form.validate_on_submit():
+            flash('success')
+            data = {k:v for k,v in form.data.items()
+                        if k not in ('submit','csrf_token')}
+            import json
+            content = json.dumps(data)
+            p = DataPackage(name=data.name, creator_id=user.id,
+                            planetary_body=data.target_body, body=content)
+            db.session.add(p)
+            db.session.commit()
+        flash_errors(form)
 
 
 def get_post(id, check_author=True):
@@ -154,10 +162,6 @@ def update(id):
     flash(f"Tring to modify package {id}", "info")
     return redirect(url_for('packages.index'))
     post = get_post(id)
-
-
-
-
     if request.method == 'POST':
         title = request.form['title']
         body = request.form['body']

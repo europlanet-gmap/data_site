@@ -108,4 +108,4 @@ class PackageForm(FlaskForm):
         id='map_type'
     )
 
-    submit = SubmitField()
+    submit = SubmitField('Submit')
