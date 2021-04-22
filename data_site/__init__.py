@@ -3,32 +3,28 @@ from sys import path
 
 from flask import Flask
 from flask import render_template
-from flask_login import LoginManager
-from flask_sqlalchemy import SQLAlchemy
+from flask_babel import Babel
 from flask_bootstrap import Bootstrap
+from flask_login import LoginManager
 from flask_migrate import Migrate
+from flask_sqlalchemy import SQLAlchemy
+from flask_wtf.csrf import CSRFProtect
+
 from .planmap_importer import init_app as planmap_importer_init
 # import planmap_importer
-from flask_babel import Babel
+
 db_name = "database.sqlite"
 
 
-db = SQLAlchemy()
-bootstrap = Bootstrap()
-migrate = Migrate()
 babel = Babel()
+bootstrap = Bootstrap()
+csrf = CSRFProtect()
+db = SQLAlchemy()
+migrate = Migrate()
 
 def create_app(test_config=None):
     # create and configure the app
     app = Flask(__name__, instance_relative_config=True)
-    bootstrap.init_app(app)
-
-    babel.init_app(app)
-
-
-    planmap_importer_init(app)
-
-
 
     db_path = os.path.join(app.instance_path, 'data_site.sqlite')
 
@@ -37,7 +33,13 @@ def create_app(test_config=None):
         DATABASE_PATH = db_path,
         SQLALCHEMY_DATABASE_URI= f"sqlite:///{db_name}")
 
+    babel.init_app(app)
+    bootstrap.init_app(app)
+    csrf.init_app(app)
     db.init_app(app)
+
+    planmap_importer_init(app)
+
 
     migrate.init_app(app, db)
 
@@ -97,4 +99,3 @@ def create_database(app):
     if not Path(app.config["DATABASE_PATH"]).exists():
         db.create_all(app=app)
         print('Created Database!')
-

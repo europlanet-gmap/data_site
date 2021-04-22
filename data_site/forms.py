@@ -79,16 +79,16 @@ class RegisterForm(FlaskForm):
 
 
 
-class UploadForm(FlaskForm):
+class UploadFile(FlaskForm):
     """
     File 'upload'
     """
-    file = FileField('Data', validators=[FileRequired()])
-    upload = SubmitField('Upload', id='submit_upload')
+    file = FileField('Data')
+    submit = SubmitField('Upload')
 
 
 
-class MainForm(FlaskForm):
+class PackageForm(FlaskForm):
     """
     Form for package submission
     """
@@ -121,40 +121,50 @@ class MainForm(FlaskForm):
         validators=[DataRequired()],
         choices=[
             ('compositional','Compositional'),
-            ('morpho','Morpho'),
+            ('morphological','Morphological'),
             ('stratigraphic','Stratigraphic')
         ],
         id='map_type'
     )
 
-
-class BboxForm(FlaskForm):
-    """
-    Bounding-box related data
-    """
     minlat = DecimalField(
         'Latitude min',
-        validators=[NumberRange(-90,90)],
+        default=-89,
+        validators=[DataRequired(),NumberRange(-90,90)],
         places=None)
 
     maxlat = DecimalField(
         'Latitude max',
-        validators=[NumberRange(-90,90)],
+        default=89,
+        validators=[DataRequired(),NumberRange(-90,90)],
         places=None)
 
     westlon = DecimalField(
         'Longitude min (west)',
-        validators=[NumberRange(0,360)],
+        default=1,
+        validators=[DataRequired(),NumberRange(0,360)],
         places=None)
 
     eastlon = DecimalField(
         'Longitude max (east)',
-        validators=[NumberRange(0,360)],
+        default=359,
+        validators=[DataRequired(),NumberRange(0,360)],
         places=None)
 
+    crs = StringField('CRS')
+    output_scale = StringField()
+    authors = StringField()
+    source_data = StringField()
+    standards = StringField()
+    doi = StringField()
+    references = StringField()
+    aims = StringField()
+    description = StringField()
+    related_products = StringField()
+    units_definition = StringField()
+    stratigraphic_info = StringField()
+    comments = StringField()
+    heritage = StringField()
+    acknowlegments = StringField()
 
-class PackageForm(FlaskForm):
-    main = FormField(MainForm, label='Basic fields')
-    bbox = FormField(BboxForm, label='Enclosing bounding-box')
-
-    submit = SubmitField('Submit', id='submit_form')
+    submit = SubmitField('Submit')

@@ -1,5 +1,5 @@
 import os
-import json
+import simplejson as json
 
 from flask import (
     Blueprint,
@@ -23,7 +23,7 @@ from werkzeug.utils import secure_filename
 
 from data_site import db, form
 from data_site.auth import login_required
-from data_site.forms import PackageForm, UploadForm
+from data_site.forms import PackageForm, UploadFile
 from data_site.models import DataPackage
 
 
@@ -85,13 +85,6 @@ def view(id):
 
 # session = {'files':None, 'fields':None}
 
-def save_file(form_file):
-    filename = secure_filename(form_file.filename)
-    localpath = os.path.join(current_app.config['UPLOAD_FOLDER'], filename)
-    form_file.save(localpath)
-    return (filename, localpath)
-
-
 def submit_package(form_data, files=None):
     data = {k:v for k,v in form_data.items()
                 if k not in ('submit','csrf_token')}
@@ -107,21 +100,72 @@ def submit_package(form_data, files=None):
     return p.id
 
 
-import shutil
-def save_package(meta, data):
-    base_path = current_app.config['UPLOAD_FOLDER']
-    pkg_path = os.path.join(base_path, meta['gmap_id'])
-    os.makedirs(pkg_path, exist_ok=True)
-    pkg_meta = os.path.join(pkg_path, 'meta.json')
-    with open(pkg_meta, 'w') as fp:
-        json.dump(meta, fp)
-    if data:
-        data_path = os.path.join(pkg_path, 'data')
-        os.makedirs(data_path, exist_ok=True)
-        for fname,fpath in data:
-            file_path = os.path.join(data_path, fname)
-            print(fpath, file_path)
-            shutil.move(fpath,file_path)
+# import shutil
+# def save_package(meta, data):
+#     base_path = current_app.config['UPLOAD_FOLDER']
+#     pkg_path = os.path.join(base_path, meta['gmap_id'])
+#     pkg_meta = os.path.join(pkg_path, 'meta.json')
+#     with open(pkg_meta, 'w') as fp:
+#         json.dump(meta, fp)
+#     if data:
+#         data_path = os.path.join(pkg_path, 'data')
+#         os.makedirs(data_path, exist_ok=True)
+#         for fname,fpath in data:
+#             file_path = os.path.join(data_path, fname)
+#             print(fpath, file_path)
+#             shutil.move(fpath,file_path)
+
+
+class PackageData:
+    def __init__(self):
+        self.fields = {}
+        self.files = {}
+        self.base_path = current_app.config['UPLOAD_FOLDER']
+
+    def set_fields(self, form_data):
+        data = {k:v for k,v in form_data.items()
+                    if k not in ('submit','csrf_token')}
+        self.fields.update(data)
+
+    def add_file(self, form_file):
+        filename = secure_filename(form_file.filename)
+        self.files.update({ filename: form_file })
+
+    def commit(self):
+        # Write meta/data to disk
+        pkg_path = os.path.join(self.base_path, self.fields['gmap_id'].lower())
+        os.makedirs(pkg_path, exist_ok=True)
+        self._write_meta(under=pkg_path)
+        self._write_data(under=pkg_path)
+
+        # Write metadata as readme/markdown to database
+        data = self.fields
+        p = DataPackage(name=data['name'], creator_id=current_user.id,
+                        planetary_body=data['target_body'],
+                        body=json.dumps(data)
+                        )
+        db.session.add(p)
+        db.session.commit()
+        return p.id
+
+    def _write_meta(self,under):
+        assert self.fields, "Package fields/metadata is not (yet) defined"
+        pkg_file = os.path.join(under, 'meta.json')
+        with open(pkg_file, 'w') as fp:
+            json.dump(self.fields, fp)
+
+    def _write_data(self,under):
+        if not self.files:
+            return None
+        # data_dir = os.path.join(under, 'data')
+        data_dir = under
+        for fname,fform in self.files.items():
+            filepath = os.path.join(data_dir, filename)
+            fform.save(filepath)
+
+    def purge_files(self):
+        for fname,fpath in self.files.items():
+            os.remove(fpath)
 
 
 @packages.route('/create', methods=('GET', 'POST'))
@@ -130,23 +174,21 @@ def create():
     """
     Handles package meta/data fields/files
     """
-    if 'files' not in session:
-        session['files'] = []
-    # if 'fields' not in session:
-    #     session['fields'] = {}
+    if 'pkg' not in session:
+        session['pkg'] = PackageData()
 
     # Handle file upload
-    upload = UploadForm()
+    upload = UploadFile()
     if upload.validate_on_submit():
-        filename = save_file(upload.file.data)
-        session['files'] += [filename]
+        if upload.file.data:
+            session['pkg'].add_file(upload.file.data)
 
     # Handle form submit
     form = PackageForm()
     if form.validate_on_submit():
-        pack_id = submit_package(form.data, files=session['files'])
-        del session['files']
-        # del session['fields']
+        session['pkg'].set_fields(form.data)
+        session['pkg'].commit()
+        del session['pkg']
         return redirect(url_for('packages.view', id=pack_id))
 
     if form.errors:
@@ -154,7 +196,7 @@ def create():
 
     return render_template('packages/create.html',
                             upload=upload, form=form,
-                            files=session['files'])
+                            files=session['pkg'].files)
     # if request.method == 'POST':
     #     form_files = None
     #     form_metadata = None
