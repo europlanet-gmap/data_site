@@ -4,11 +4,23 @@
 
 {% block content %}
 
-    <h2> {{  package_name }} </h2>
+
+<div class="container">
+  <div class="jumbotron">
+    <h2>{{  package_name }}</h2>
+{#    <p class="lead text-muted" > Search GMAP packages</p>#}
+  </div>
+
+
+
+
+{#    <h2>  </h2>#}
 
 
     <div class="jumbotron">
-    {{ description }}
+         {{ description }}
     </div>
 
+
+</div>
 {%  endblock %}

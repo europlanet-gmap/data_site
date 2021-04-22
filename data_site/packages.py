@@ -2,7 +2,7 @@ import os
 
 from flask import (
     Blueprint, flash, g, redirect, render_template, request, url_for,
-    current_app
+    current_app, session
 )
 
 
@@ -58,65 +58,54 @@ def get_unique_values_for_form(field, label="planetary_body"):
 
 @packages.route('/all-packages/', methods=["GET", "POST"])
 def all_packages():
-    page = request.args.get('page', 1, type=int)
-    # print(request.args)
+    page = request.args.get('page', 1, type=int) # get the page number
+
+    if request.method != 'POST' and "args" in session.keys(): # we are not submitting any new search criteria
+        args = session['args'] # we retrieve the latest values
+    else:
+        session['args'] = {"query":"", "body":"Any", "creator": "Any"}
+        args = {}
 
 
-
-    form = SearchForm()
-    # print(form.query.data)
-    # print(form.body.data)
-    # print(form.validate_on_submit())
+    form = SearchForm(**args)
 
 
     from .models import DataPackage
-    from . import db
 
     bodies= get_unique_values_for_form(DataPackage.planetary_body, label="planetary_body")
     form.set_bodies(bodies)
 
-
     creators = get_unique_values_for_form(User.username, label="username")
     form.set_creators(creators)
 
-    # bodies = db.session.query(DataPackage.planetary_body.distinct().label("planetary_body")).all()
-    # # bodies = DataPackage.body.distinct().label("body").all()
-    #
-    # bodies = [b[0] if b[0] is not None else "Any" for b in bodies]
-    # bodies = [[str(b),str(b).capitalize()] for b in bodies]
+    q = DataPackage.query # set up the query
 
-    q = DataPackage.query
+    if form.validate_on_submit(): # new submission -> save into session
 
+        if form.reset.data:
+            session["args"] = {"query":"", "body":"Any", "creator": "Any"}
+            return redirect(url_for("packages.all_packages"))
 
-    if form.validate_on_submit():
-        print("executing")
-        query = form.query.data
-        body = form.body.data
-        creator = form.creator.data
-        print(creator)
+        session["args"] = request.form
 
+    # extract filters
+    query = session["args"]["query"]
+    body = session["args"]["body"]
+    creator = session["args"]["creator"]
 
-        if query:
-            q = q.filter(DataPackage.name.like('%' + query + '%'))
+    if query:
+        q = q.filter(DataPackage.name.like('%' + query + '%'))
 
-        if body != "Any":
-            q = q.filter_by(planetary_body=body)
+    if body != "Any":
+        q = q.filter_by(planetary_body=body)
 
-        if creator != "Any":
-            q = q.join(DataPackage.creator, aliased=True) \
-                .filter_by(username = creator)
-
-
-
-
+    if creator != "Any":
+        q = q.join(DataPackage.creator, aliased=True) \
+            .filter_by(username = creator)
 
     packs = q.paginate(page=page, per_page=12)
-
-
     pagination = Pagination(page=page, per_page=12, total=q.count(),
                             css_framework='bootstrap4', alignment="right")
-
-
 
 
     return render_template("packages/all_packages.html", packages=packs.items, spanning=4, search_form=form, pagination=pagination)

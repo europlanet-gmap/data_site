@@ -111,6 +111,7 @@ class SearchForm(FlaskForm):
     body = SelectField("Body", validators=[Optional()])
     creator = SelectField("Creator", validators=[Optional()])
     submit = SubmitField("Search")
+    reset = SubmitField("Reset")
 
     def set_bodies(self, bodies):
         self.body.choices = bodies
