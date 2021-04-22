@@ -37,6 +37,7 @@ class ViewTool(Tool):
         return True
 
 
+
 class DataPackage(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     name = db.Column(db.String(10000)) # package name, should be enough to find out the url for downloading the package
@@ -59,7 +60,6 @@ class DataPackage(db.Model):
     @property
     def tools(self):
         return [ViewTool(), EditTool()]
-
 
 
 

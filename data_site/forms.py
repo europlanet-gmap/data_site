@@ -1,7 +1,13 @@
 from flask_wtf import FlaskForm
 
+from flask_wtf.file import FileField, FileRequired
+
+# from werkzeug.utils import secure_filename
+
 from wtforms import (
     BooleanField,
+    DecimalField,
+    FormField,
     PasswordField,
     SelectField,
     SelectMultipleField,
@@ -15,6 +21,7 @@ from wtforms.validators import (
     Email,
     EqualTo,
     Length,
+    NumberRange,
     Regexp
     )
 
@@ -71,10 +78,27 @@ class RegisterForm(FlaskForm):
             raise ValidationError('The username is already in use.')
 
 
-class PackageForm(FlaskForm):
+
+class UploadForm(FlaskForm):
+    """
+    File 'upload'
+    """
+    file = FileField('Data', validators=[FileRequired()])
+    upload = SubmitField('Upload', id='submit_upload')
+
+
+
+class MainForm(FlaskForm):
     """
     Form for package submission
     """
+    gmap_id = StringField(
+        'Gmap ID',
+        validators=[DataRequired()],
+        render_kw={'readonly': True},
+        id='gmap_id'
+    )
+
     name = StringField(
         'Name',
         validators=[DataRequired()],
@@ -92,11 +116,6 @@ class PackageForm(FlaskForm):
         id='target_body'
     )
 
-    gmap_id = StringField(
-        'Gmap ID',
-        validators=[DataRequired()]
-    )
-
     map_type = SelectMultipleField(
         'Map type',
         validators=[DataRequired()],
@@ -108,4 +127,34 @@ class PackageForm(FlaskForm):
         id='map_type'
     )
 
-    submit = SubmitField('Submit')
+
+class BboxForm(FlaskForm):
+    """
+    Bounding-box related data
+    """
+    minlat = DecimalField(
+        'Latitude min',
+        validators=[NumberRange(-90,90)],
+        places=None)
+
+    maxlat = DecimalField(
+        'Latitude max',
+        validators=[NumberRange(-90,90)],
+        places=None)
+
+    westlon = DecimalField(
+        'Longitude min (west)',
+        validators=[NumberRange(0,360)],
+        places=None)
+
+    eastlon = DecimalField(
+        'Longitude max (east)',
+        validators=[NumberRange(0,360)],
+        places=None)
+
+
+class PackageForm(FlaskForm):
+    main = FormField(MainForm, label='Basic fields')
+    bbox = FormField(BboxForm, label='Enclosing bounding-box')
+
+    submit = SubmitField('Submit', id='submit_form')
