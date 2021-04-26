@@ -1,4 +1,5 @@
 import os
+import shutil
 import simplejson as json
 
 from flask import (
@@ -19,7 +20,6 @@ from markupsafe import Markup
 from markdown import markdown, Markdown
 
 from werkzeug.exceptions import abort
-from werkzeug.utils import secure_filename
 
 from data_site import db, form, utils
 from data_site.auth import login_required
@@ -83,37 +83,19 @@ def view(id):
     return render_template("packages/view.html", package_name=pack.name, description=Markup(ashtml))
 
 
-# session = {'files':None, 'fields':None}
-
-def submit_package(form_data, files=None):
-    data = {k:v for k,v in form_data.items()
-                if k not in ('submit','csrf_token')}
-    if files:
-        data.update({'files':files})
-    content = json.dumps(data)
-    p = DataPackage(name=data['name'], creator_id=current_user.id,
-                    planetary_body=data['target_body'],
-                    body=content)
-    db.session.add(p)
-    db.session.commit()
-    save_package(form_data, files)
-    return p.id
-
-
-# import shutil
-# def save_package(meta, data):
-#     base_path = current_app.config['UPLOAD_FOLDER']
-#     pkg_path = os.path.join(base_path, meta['gmap_id'])
-#     pkg_meta = os.path.join(pkg_path, 'meta.json')
-#     with open(pkg_meta, 'w') as fp:
-#         json.dump(meta, fp)
-#     if data:
-#         data_path = os.path.join(pkg_path, 'data')
-#         os.makedirs(data_path, exist_ok=True)
-#         for fname,fpath in data:
-#             file_path = os.path.join(data_path, fname)
-#             print(fpath, file_path)
-#             shutil.move(fpath,file_path)
+# def submit_package(form_data, files=None):
+#     data = {k:v for k,v in form_data.items()
+#                 if k not in ('submit','csrf_token')}
+#     if files:
+#         data.update({'files':files})
+#     content = json.dumps(data)
+#     p = DataPackage(name=data['name'], creator_id=current_user.id,
+#                     planetary_body=data['target_body'],
+#                     body=content)
+#     db.session.add(p)
+#     db.session.commit()
+#     save_package(form_data, files)
+#     return p.id
 
 
 class PackageData:
@@ -159,26 +141,6 @@ class PackageData:
         shutil.rmtree(self.data['dir'])
 
 
-def mkdtemp():
-    """
-    Return path to temporary dir
-    """
-    from tempfile import mkdtemp
-    tmpdir = utils.Tempdir(dir = current_app.config['UPLOAD_FOLDER'])
-    os.makedirs(tmpdir)
-    return tmpdir
-
-
-def save_file(file_form, dir):
-    """
-    Return filename uploaded
-    """
-    filename = secure_filename(file_form.filename)
-    filepath = os.path.join(dir, filename)
-    file_form.save(filepath)
-    return filename
-
-
 @packages.route('/create', methods=('GET', 'POST'))
 @login_required
 def create():
@@ -195,8 +157,8 @@ def create():
     if upload.validate_on_submit():
         if upload.file.data:
             if 'files' not in session['data']:
-                session['data'].update({'dir':mkdtemp(), 'files':[]})
-            filename = save_file(upload.file.data, dir=session['data']['dir'])
+                session['data'].update({'dir':utils.mkdtemp(), 'files':[]})
+            filename = utils.save_file(upload.file.data, dir=session['data']['dir'])
             session['data']['files'].append(filename)
 
     # Handle form submit
@@ -216,9 +178,13 @@ def create():
     if form.errors:
         flash_errors(form)
 
+    try:
+        files = session['data']['files']
+    except:
+        files = []
     return render_template('packages/create.html',
                             upload=upload, form=form,
-                            files=session['data']['files']
+                            files=files
                             )
 
 
