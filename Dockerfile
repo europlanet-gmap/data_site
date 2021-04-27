@@ -19,7 +19,7 @@ COPY Pipfile.lock .
 RUN PIPENV_VENV_IN_PROJECT=1 pipenv install --deploy
 
 
-FROM base AS runtime
+FROM base AS setup
 
 # Copy virtual env from python-deps stage
 COPY --from=python-deps /.venv /.venv
@@ -34,11 +34,19 @@ WORKDIR /app
 # Install application into container
 COPY . .
 
-EXPOSE 5000
-
-# Run the application
+# Init the application
 ENV FLASK_APP=data_site
 ENV FLASK_ENV=development
+
+RUN flask db init \
+    && flask db migrate \
+    && flask db upgrade \
+    && flask import-planmap
+
+FROM setup AS runtime
+
+ARG FLASK_ENV=development
+ENV FLASK_ENV=$FLASK_ENV
 ENTRYPOINT ["python", "-m", "flask", "run"]
 CMD ["--host", "0.0.0.0", "--port", "5000"]
 # CMD ["--port", "5000"]
