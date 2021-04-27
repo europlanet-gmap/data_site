@@ -45,7 +45,7 @@ RUN flask db init \
 
 FROM setup AS runtime
 
-ARG FLASK_ENV=development
+ARG FLASK_ENV=production
 ENV FLASK_ENV=$FLASK_ENV
 ENTRYPOINT ["python", "-m", "flask", "run"]
 CMD ["--host", "0.0.0.0", "--port", "5000"]
