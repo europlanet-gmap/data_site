@@ -5,7 +5,7 @@ main = Blueprint('main', __name__)
 
 @main.route('/')
 def index():
-    flash("Home page. to be done")
+    # flash("Home page. to be done")
 
     from .models import DataPackage
     packages = DataPackage.query.filter(DataPackage.thumbnail_url != "").order_by('creation_date').limit(9)
