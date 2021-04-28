@@ -1,22 +1,31 @@
 import os
-from sys import path
 
 from flask import Flask
-from flask import render_template
-from flask_login import LoginManager
+from flask_login import LoginManager, login_required
+from flask_menu import register_menu
 from flask_sqlalchemy import SQLAlchemy
 from flask_bootstrap import Bootstrap
 from flask_migrate import Migrate
 from .planmap_importer import init_app as planmap_importer_init
 # import planmap_importer
 from flask_babel import Babel
-db_name = "database.sqlite"
 
+from flask_admin.contrib.sqla import ModelView
+from flask_admin import Admin
+# from flask_menu import Menu, register_menu, current_menu
 
 db = SQLAlchemy()
 bootstrap = Bootstrap()
 migrate = Migrate()
 babel = Babel()
+admin = Admin(name='data_site', template_mode='bootstrap4')
+# menu = Menu()
+
+from .menu import MenuManager
+
+menu_manager = MenuManager()
+
+
 
 def create_app(test_config=None):
     # create and configure the app
@@ -25,21 +34,39 @@ def create_app(test_config=None):
 
     babel.init_app(app)
 
+    menu_manager.init_app(app)
 
     planmap_importer_init(app)
 
 
 
-    db_path = os.path.join(app.instance_path, 'data_site.sqlite')
+    db_path = os.path.join(app.instance_path, 'database.sqlite')
+    print(db_path)
+    
 
     app.config.from_mapping(
         SECRET_KEY="dev",
         DATABASE_PATH = db_path,
-        SQLALCHEMY_DATABASE_URI= f"sqlite:///{db_name}")
+        SQLALCHEMY_DATABASE_URI= f"sqlite:///{db_path}")
 
     db.init_app(app)
 
     migrate.init_app(app, db)
+
+
+    # simple admin iface
+    admin.init_app(app)
+    from .models import User, DataPackage
+
+    admin.add_view(ModelView(User, db.session))
+    admin.add_view(ModelView(DataPackage, db.session))
+
+
+
+
+
+    # menu.init_app(app)
+
 
 
     if test_config is None:
@@ -89,7 +116,11 @@ def create_app(test_config=None):
     ALLOWED_EXTENSIONS = {'tif', 'tiff', 'zip', 'gpkg', 'pdf', 'png', 'jpg'}
     app.config['ALLOWED_EXTENSIONS'] = ALLOWED_EXTENSIONS
 
+
     return app
+
+
+
 
 
 def create_database(app):

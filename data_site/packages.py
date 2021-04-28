@@ -18,13 +18,15 @@ from .forms import SearchForm
 from .models import DataPackage, User
 
 from flask_paginate import Pagination, get_page_args
-
+from flask_menu import register_menu
 from .forms import PackageForm
+
 
 packages = Blueprint('packages', __name__)
 
 
 @packages.route('/packages', methods=["GET"])
+@register_menu(packages, 'packages.list', 'Packages List', order=10, type="main")
 def index():
 
     s = request.args.get('sort', 'id')
@@ -57,13 +59,16 @@ def get_unique_values_for_form(field, label="planetary_body"):
 
 
 @packages.route('/all-packages/', methods=["GET", "POST"])
+@register_menu(packages, 'packages.packs', 'Packages', order=0, type="main")
 def all_packages():
+
+    default_args ={"query":"", "body":"Any", "creator": "Any"}
     page = request.args.get('page', 1, type=int) # get the page number
 
     if request.method != 'POST' and "args" in session.keys(): # we are not submitting any new search criteria
         args = session['args'] # we retrieve the latest values
     else:
-        session['args'] = {"query":"", "body":"Any", "creator": "Any"}
+        session['args'] =default_args
         args = {}
 
 
@@ -83,7 +88,7 @@ def all_packages():
     if form.validate_on_submit(): # new submission -> save into session
 
         if form.reset.data:
-            session["args"] = {"query":"", "body":"Any", "creator": "Any"}
+            session["args"] = default_args # reset to default and reload
             return redirect(url_for("packages.all_packages"))
 
         session["args"] = request.form
@@ -133,6 +138,7 @@ def view(id):
 
 
 @packages.route('/create', methods=('GET', 'POST'))
+@register_menu(packages, 'user.create', 'New Package', order=100, visible_when=lambda: current_user.is_authenticated)
 @login_required
 def create(values={'files':None, 'metadata':None}):
     # if request.method == 'POST':

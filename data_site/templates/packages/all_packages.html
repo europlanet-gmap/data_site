@@ -7,74 +7,74 @@
 
 {% block content %}
 
-{#    <div class="jumbotron text-center" >#}
-{#        <div class="container mt-5" >#}
-{#            <h2 class="jumbotron-heading"> Package search </h2>#}
-{#            <p class="lead text-muted" > Search GMAP packages</p>#}
-{##}
-            {#            <p>#}
-            {#                <a href="/packages" class="btn btn-primary my-2">Browse all packages</a>#}
-            {#            </p>#}
-{##}
-{##}
-{#        </div>#}
-{##}
-{##}
-{#    </div>#}
-{##}
+    {#    <div class="jumbotron text-center" >#}
+    {#        <div class="container mt-5" >#}
+    {#            <h2 class="jumbotron-heading"> Package search </h2>#}
+    {#            <p class="lead text-muted" > Search GMAP packages</p>#}
+    {##}
+    {#            <p>#}
+    {#                <a href="/packages" class="btn btn-primary my-2">Browse all packages</a>#}
+    {#            </p>#}
+    {##}
+    {##}
+    {#        </div>#}
+    {##}
+    {##}
+    {#    </div>#}
+    {##}
 
 
-<div class="container">
-  <div class="jumbotron">
-    <h2>Package search</h2>
-    <p class="lead text-muted" > Search GMAP packages</p>
-  </div>
+    <div class="container">
+        <div class="jumbotron">
+            <h2>Package search</h2>
+            <p class="lead text-muted" > Search GMAP packages</p>
+        </div>
 
 
 
 
-    <div class="wrapper text-center">
+        <div class="wrapper text-center">
 
-        <form action="{{ url_for("packages.all_packages") }}" method="post">
+            <form action="{{ url_for("packages.all_packages") }}" method="post">
 
-            <div class="form-group">
-                <div class="row">
+
+                <div class="form-row">
 
                     {% for f in search_form %}
                         {% if f.type in ['CSRFTokenField', 'HiddenField'] %}
                             {{ f() }}
                         {% else %}
+                            <div class="form-group col-md-4">
+                                    {{ f.label(class="form-label") }}
 
-                            <div class="col-md-4">
-                                {{ f.label(class="form-label") }}
+                                    {{ f(class="form-control") }}
 
-                                {{ f(class="form-control") }}
                             </div>
 
                         {% endif %}
                     {% endfor %}
 
                 </div>
-            </div>
 
 
-        </form>
 
-        {#
+            </form>
+
+            {#
 {#        </div>#}
-    </div>
+        </div>
 
 
-    {#<div class="row">#}
-    {#      <div class="col">left</div>#}
-    {#      <div class="col">#}
-    {#          <div class="float-right">element needs to be right aligned</div>#}
-    {#      </div>#}
-    {#</div>#}
-    <p>
-        {{ pagination.links }}
-    </p>
-{#    <div class="container">#}
+        {#<div class="row">#}
+        {#      <div class="col">left</div>#}
+        {#      <div class="col">#}
+        {#          <div class="float-right">element needs to be right aligned</div>#}
+        {#      </div>#}
+        {#</div>#}
+        <p>
+            {{ pagination.links }}
+        </p>
+        {#    <div class="container">#}
 
         <div class="album py-5 bg-light">
 

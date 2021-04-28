@@ -1,6 +1,7 @@
 import click
 
 from flask import Blueprint, render_template, request, flash, redirect, url_for
+from flask_menu import register_menu
 
 from .forms import RegisterForm, LoginForm
 from .models import User
@@ -32,7 +33,12 @@ def redirect_back(default='/', **kwargs):
             return redirect(target)
     return redirect(url_for(default, **kwargs))
 
+
+
+
+
 @auth.route('/login', methods=['GET', 'POST'])
+@register_menu(auth, 'user.login', 'Login', order=0, type="user", visible_when=lambda: not current_user.is_authenticated)
 def login():
     if current_user.is_authenticated:
         return redirect(url_for('index'))
@@ -70,13 +76,13 @@ def login():
 #     return render_template("auth/login.html", user=current_user)
 
 
-
 @auth.route('/logout')
 @login_required
+@register_menu(auth, 'user.logout', 'Logout', order=0, type="user", visible_when=lambda: current_user.is_authenticated)
 def logout():
     logout_user()
     flash("Logged out", "info")
-    return redirect(url_for('packages.index'))
+    return redirect(url_for('main.index'))
 
 
 # @auth.route('/register', methods=['GET', 'POST'])
@@ -111,6 +117,7 @@ def logout():
 
 
 @auth.route('/register', methods=['GET', 'POST'])
+@register_menu(auth, 'user.register', 'Register', order=0, type="user", visible_when=lambda: not  current_user.is_authenticated)
 def register():
     if current_user.is_authenticated:
         return redirect(url_for('main.index'))
