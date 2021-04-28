@@ -35,6 +35,7 @@ markdown = "*"
 flask-paginate = "*"
 flask-admin = "*"
 flask-menu = "*"
+blinker = "*"
 
 [dev-packages]
 
