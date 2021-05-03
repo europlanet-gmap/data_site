@@ -11,6 +11,17 @@ The backend being Python eases the integration between frontend and the backend
 tools we already have built.
 
 
+## Install
+This project uses [pipenv](https://pypi.org/project/pipenv/) for portability.
+After cloning this repo, install and run the environment as follows:
+
+```bash
+$ pipenv install
+$ pipenv shell
+```
+and proceed to run the software as explained in the next sections (e.g, `flask run`).
+
+
 ## Important notes
 - we now use bootstrap-flask for managing boostrap (this changes the templates also)
 - to handle changes in the structure of the DB we now use [migrate](https://github.com/miguelgrinberg/Flask-Migrate). If the models were changed we need to:
@@ -42,7 +53,7 @@ $ flask remove-planmap
 ```
 
 - A new user "planmap-heritage" is automatically creater the first time
-- A dummy pasword is set for the planmap-heritage user
+- A dummy password is set for the planmap-heritage user
 
 
 

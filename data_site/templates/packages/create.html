@@ -1,57 +1,83 @@
 {% extends 'base.html' %}
+{% from 'bootstrap/form.html' import render_form %}
 
-{% block title %}Submit form{% endblock %}
-
-{% block content %}
-  <h1>Upload new File</h1>
-  <form method=post enctype=multipart/form-data>
-    {% if files is not none %}
-    <ul>
-      {% for filename in files %}
-        <li>{{ filename }}</li>
-      {% endfor %}
-    </ul>
-    {% endif %}
-    <div class="form-group">
-      <input class="form-control-file" type="file" name="file">
-      <input class="btn btn-primary" type=submit value=Upload name="_form_upload">
-    </div>
-  </form>
-
-  <h1>Metadata form</h1>
-  <form method="POST">
-
-    {% for field in fields %}
-      {{ input(requireds=requireds, **field) }}
-    {% endfor %}
-    <input class="btn btn-primary" type="submit" value="Submit" name="_form_metadata">
-  </form>
+{% block header %}
+  {% block title %}
+    <h1>
+      New Package
+    </h1>
+  {% endblock %}
 {% endblock %}
 
+{% block content %}
+  <div class="jumbotron">
+    <div class="row">
+      <!-- <div class="col-md-8 ">
+        <img src="{{ url_for('static', filename='logo.svg') }}" class="rounded img-fluid">
+      </div> -->
+      <div class="col-md-8">
+        <div class="card mb-3 w-100 bg-light">
+          <div class="card-header">
+            <h4>Data</h4>
+          </div>
+          <div class="card-body">
+            {{ render_form(form) }}
+          </div>
+        </div>
+      </div>
+      <div class="col-md-4">
+        <div class="card mb-3 w-100 bg-light">
+          <div class="card-header">
+            <h4>Data</h4>
+          </div>
+          <div class="card-body">
+            <ul>
+              {% for file in files %}
+                <li>
+                  {{ file }}
+                </li>
+              {% endfor %}
+            </ul>
+            {{ render_form(upload) }}
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+{% endblock %}
 
-{% macro input(name, value='', type='text', size=20, enum=None, description=None, requireds=None) -%}
-    <label for="{{ name }}">
-      {{ name|replace("_"," ")|capitalize }}
-      {% if requires is iterable and name in requireds %}
-        <sup><small>(required)</small></sup>
-      {% endif %}
-    </label>
-    {% if enum is iterable %}
-      <select class="form-control" name="{{ name }}" id="{{ name }}">
-        {% for item in enum %}
-          <option value="{{ item }}">{{ item }}</option>
-        {% endfor %}
-      </select>
-    {% else %}
-      <input class="form-control"
-        type="{{ type }}" id="{{ name }}"
-        name="{{ name }}"
-        {% if type is equalto "number" %}
-          value="{{ value|e|float }}"
-        {% else %}
-          value="{{ value|e }}"
-        {% endif %}
-        size="{{ size }}"
-      >
-    {% endif %}
-{%- endmacro %}
+{% block scripts %}
+  {{ super() }}
+  <script>
+    function replaceInputWhitespaces(e) {
+      // const elem = document.getElementById('name');
+      const elem = e.currentTarget;
+      const value = elem.value.toLowerCase().replace(" ","-");
+      if (value != elem.value) {
+        console.log(`NAME value replaced: ${value},${elem.value}`);
+        elem.value = value;
+      }
+    }
+    $('#name').on('input', function(e){
+      replaceInputWhitespaces(e);
+    })
+
+    function updateGmapID() {
+      const body = document.getElementById("target_body").value;
+      const _types = document.getElementById("map_type").selectedOptions;
+      const type = Array.from(_types).map(({value}) => value.charAt(0)).sort().join("");
+      const name = document.getElementById("name").value;
+      const v_id = `GM_${body}_${type}_${name}`;
+      document.getElementById("gmap_id").value = v_id;
+    }
+    $('#map_type').on('change', function() {
+      updateGmapID();
+    })
+    $('#name').on('change', function() {
+      updateGmapID();
+    })
+    $('#target_body').on('change', function() {
+      updateGmapID();
+    })
+  </script>
+{% endblock scripts %}
