@@ -1,5 +1,6 @@
 import os
-import json
+import shutil
+import simplejson as json
 
 from flask import (
     Blueprint,
@@ -19,11 +20,10 @@ from markupsafe import Markup
 from markdown import markdown, Markdown
 
 from werkzeug.exceptions import abort
-from werkzeug.utils import secure_filename
 
-from data_site import db, form
+from data_site import db, form, utils
 from data_site.auth import login_required
-from data_site.forms import PackageForm, UploadForm
+from data_site.forms import PackageForm, UploadFile
 from data_site.models import DataPackage
 
 
@@ -83,45 +83,62 @@ def view(id):
     return render_template("packages/view.html", package_name=pack.name, description=Markup(ashtml))
 
 
-# session = {'files':None, 'fields':None}
-
-def save_file(form_file):
-    filename = secure_filename(form_file.filename)
-    localpath = os.path.join(current_app.config['UPLOAD_FOLDER'], filename)
-    form_file.save(localpath)
-    return (filename, localpath)
-
-
-def submit_package(form_data, files=None):
-    data = {k:v for k,v in form_data.items()
-                if k not in ('submit','csrf_token')}
-    if files:
-        data.update({'files':files})
-    content = json.dumps(data)
-    p = DataPackage(name=data['name'], creator_id=current_user.id,
-                    planetary_body=data['target_body'],
-                    body=content)
-    db.session.add(p)
-    db.session.commit()
-    save_package(form_data, files)
-    return p.id
+# def submit_package(form_data, files=None):
+#     data = {k:v for k,v in form_data.items()
+#                 if k not in ('submit','csrf_token')}
+#     if files:
+#         data.update({'files':files})
+#     content = json.dumps(data)
+#     p = DataPackage(name=data['name'], creator_id=current_user.id,
+#                     planetary_body=data['target_body'],
+#                     body=content)
+#     db.session.add(p)
+#     db.session.commit()
+#     save_package(form_data, files)
+#     return p.id
 
 
-import shutil
-def save_package(meta, data):
-    base_path = current_app.config['UPLOAD_FOLDER']
-    pkg_path = os.path.join(base_path, meta['gmap_id'])
-    os.makedirs(pkg_path, exist_ok=True)
-    pkg_meta = os.path.join(pkg_path, 'meta.json')
-    with open(pkg_meta, 'w') as fp:
-        json.dump(meta, fp)
-    if data:
-        data_path = os.path.join(pkg_path, 'data')
-        os.makedirs(data_path, exist_ok=True)
-        for fname,fpath in data:
-            file_path = os.path.join(data_path, fname)
-            print(fpath, file_path)
-            shutil.move(fpath,file_path)
+class PackageData:
+    def __init__(self, meta, data):
+        self.meta = meta
+        self.data = data
+        self.base_path = current_app.config['UPLOAD_FOLDER']
+
+    def commit(self):
+        # Write meta/data to disk
+        pkg_path = os.path.join(self.base_path, self.meta['gmap_id'].lower())
+        os.makedirs(pkg_path, exist_ok=True)
+        self._write_meta(under=pkg_path)
+        self._write_data(under=pkg_path)
+
+        # Write metadata as readme/markdown to database
+        p = DataPackage(name=self.meta['name'], creator_id=current_user.id,
+                        planetary_body=self.meta['target_body'],
+                        body=json.dumps(self.meta)
+                        )
+        db.session.add(p)
+        db.session.commit()
+        return p.id
+
+    def _write_meta(self,under):
+        assert self.meta, "Package fields/metadata is not (yet) defined"
+        pkg_file = os.path.join(under, 'meta.json')
+        with open(pkg_file, 'w') as fp:
+            json.dump(self.meta, fp)
+
+    def _write_data(self,under):
+        if self.data:
+            assert 'dir' in self.data
+            assert 'files' in self.data
+            temp_dir = self.data['dir']
+            dest_dir = os.path.join(under, 'data')
+            for fname in self.data['files']:
+                temppath = os.path.join(temp_dir, fname)
+                destpath = os.path.join(dest_dir, fname)
+                shutil.move(temppath, destpath)
+
+    def __del__(self):
+        shutil.rmtree(self.data['dir'])
 
 
 @packages.route('/create', methods=('GET', 'POST'))
@@ -130,90 +147,45 @@ def create():
     """
     Handles package meta/data fields/files
     """
-    if 'files' not in session:
-        session['files'] = []
-    # if 'fields' not in session:
-    #     session['fields'] = {}
+    upload = UploadFile()
+    form = PackageForm()
+
+    if 'data' not in session:
+        session['data'] = {}
 
     # Handle file upload
-    upload = UploadForm()
     if upload.validate_on_submit():
-        filename = save_file(upload.file.data)
-        session['files'] += [filename]
+        if upload.file.data:
+            if 'files' not in session['data']:
+                session['data'].update({'dir':utils.mkdtemp(), 'files':[]})
+            filename = utils.save_file(upload.file.data, dir=session['data']['dir'])
+            session['data']['files'].append(filename)
 
     # Handle form submit
-    form = PackageForm()
     if form.validate_on_submit():
-        pack_id = submit_package(form.data, files=session['files'])
-        del session['files']
-        # del session['fields']
+        # Clean out wtform related fields from data of interest
+        meta = {k:v for k,v in form.data.items()
+                    if k not in ('submit','csrf_token')}
+        # If data files were uploaded, use them
+        data = session['data'] if 'data' in session else None
+        # Initialize a "package" object to handle the writing (filesystem & database)
+        pkg = PackageData(meta=meta, data=data)
+        pack_id = pkg.commit()
+        del pkg, session['data']
+        # Assuming everything is good, redirect user to new package's view
         return redirect(url_for('packages.view', id=pack_id))
 
     if form.errors:
         flash_errors(form)
 
+    try:
+        files = session['data']['files']
+    except:
+        files = []
     return render_template('packages/create.html',
                             upload=upload, form=form,
-                            files=session['files'])
-    # if request.method == 'POST':
-    #     form_files = None
-    #     form_metadata = None
-    #     error = None
-    #     if '_form_metadata' in request.form:
-    #         _form = request.form.copy()
-    #         _form.pop('_form_metadata')
-    #         errors = []
-    #         try:
-    #             form_parsed = form.parse(_form)
-    #             print(form_parsed)
-    #             form_ok = form.validate(form_parsed, errors)
-    #             print(f"Form ok {form_ok}")
-    #         except Exception as err:
-    #             raise err
-    #         else:
-    #             values['metadata'] = form_parsed
-    #         if  form_ok is not None:
-    #             assert errors, errors
-    #             [ flash(e) for e in errors ]
-    #         else:
-    #             flash('success')
-    #
-    #             from .models import DataPackage
-    #
-    #             pack = DataPackage(name=form_parsed["gmap_id"], creator_id=current_user.id)
-    #             from . import db
-    #             db.session.add(pack)
-    #             db.session.commit()
-    #
-    #             # db = get_db()
-    #             # db.execute(
-    #             #     'INSERT INTO post (title, body, author_id)'
-    #             #     ' VALUES (?, ?, ?)',
-    #             #     (title, body, g.user['id'])
-    #             # )
-    #             # db.commit()
-    #             return redirect(url_for('index'))
-    #     else:
-    #         assert '_form_upload' in request.form
-    #         # _form = request.form.copy()
-    #         # _form.pop('_form_upload')
-    #         # check if the post request has the file part
-    #         if 'file' not in request.files:
-    #             flash('No file selected')
-    #             return redirect(request.url)
-    #         file = request.files['file']
-    #         # if user does not select file, browser also
-    #         # submit an empty part without filename
-    #         if file.filename == '':
-    #             flash('No file selected')
-    #             return redirect(request.url)
-    #         if file and form.allowed_file(file.filename):
-    #             filename = secure_filename(file.filename)
-    #             localpath = os.path.join(current_app.config['UPLOAD_FOLDER'], filename)
-    #             file.save(localpath)
-    #             values['files'] = values['files'] + [filename] if values['files'] else [filename]
-    #
-    # return form.render(metadata=values['metadata'], files=values['files'])
+                            files=files
+                            )
 
 
 def get_post(id, check_author=True):
