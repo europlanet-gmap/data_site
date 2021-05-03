@@ -1,9 +1,12 @@
-import click
 
-from flask import Blueprint, render_template, request, flash, redirect, url_for
+
+import click
+from authlib.integrations.httpx_client import OAuth2Auth
+
+from flask import Blueprint, render_template, request, flash, redirect, url_for, jsonify
 from flask_menu import register_menu
 
-from .forms import RegisterForm, LoginForm
+from .forms import RegisterForm, LoginForm, LoginFormGitlab
 from .models import User
 from werkzeug.security import generate_password_hash, check_password_hash
 from . import db
@@ -33,13 +36,20 @@ def redirect_back(default='/', **kwargs):
             return redirect(target)
     return redirect(url_for(default, **kwargs))
 
+# @auth.route('/gitlab', methods=['GET', 'POST'])
+# def test_gitlab():
+#     from . import oauth
+#     token = oauth.gitlab.authorize_access_token()
+#     # print(token)
+#     # resp = oauth.gitlab.get('account/verify_credentials.json')
+#     # resp.raise_for_status()
+#     # profile = resp.json()
+#     # print(profile)
 
 
-
-
-@auth.route('/login', methods=['GET', 'POST'])
-@register_menu(auth, 'user.login', 'Login', order=0, type="user", visible_when=lambda: not current_user.is_authenticated)
-def login():
+@auth.route('loginold', methods=['GET', 'POST'])
+@register_menu(auth, 'user.login_old', 'Login Old', order=0, type="user", visible_when=lambda: not current_user.is_authenticated)
+def login_old():
     if current_user.is_authenticated:
         return redirect(url_for('index'))
 
@@ -55,28 +65,53 @@ def login():
                 return redirect(url_for('/'))
         flash('Invalid email or password.', 'warning')
     return render_template('auth/login.html', form=form)
-#
-# @auth.route('/login', methods=['GET', 'POST'])
-# def login():
-#     if request.method == 'POST':
-#         email = request.form.get('email')
-#         password = request.form.get('password')
-#
-#         user = User.query.filter_by(email=email).first()
-#         if user:
-#             if check_password_hash(user.password, password):
-#                 flash('Logged in successfully!', category='success')
-#                 login_user(user, remember=True)
-#                 return redirect(url_for('views.home'))
-#             else:
-#                 flash('Incorrect password, try again.', category='error')
-#         else:
-#             flash('Email does not exist.', category='error')
-#
-#     return render_template("auth/login.html", user=current_user)
 
 
-@auth.route('/logout')
+def handle_authorize(remote, token, user_info):
+    """handels oauth authorized users"""
+    # return jsonify(user_info)
+
+    if user_info:
+        user = User.query.filter_by(email=user_info["email"]).first()
+        if user is not None and login_user(user, True):
+            flash('Login success.', 'info')
+
+            import gitlab
+            gl = gitlab.Gitlab('https://git.europlanet-gmap.eu', oauth_token=token["access_token"])
+            gl.auth()
+            uid = gl.user.id
+            print(f"--- > uid {uid}")
+
+            # import requests
+            # o = requests.get("https://git.europlanet-gmap.eu/api/v4/groups", auth=auth)
+            # return jsonify(o.content)
+
+
+            return redirect(url_for("main.index"))
+        else:
+            user = User(email = user_info["email"])
+            db.session.add(user)
+            db.session.commit()
+
+    else:
+        flash("Login unsuccessful. Please try again")
+        return redirect(url_for('/login'))
+
+@auth.route('login', methods=['GET', 'POST'])
+@register_menu(auth, 'user.login', 'Login', order=0, type="user", visible_when=lambda: not current_user.is_authenticated)
+def login():
+    if current_user.is_authenticated:
+        return redirect(url_for('main.index'))
+
+    form = LoginFormGitlab()
+    if form.validate_on_submit():
+        return redirect(url_for("loginpass.login", name="gitlab"))
+
+    return render_template('auth/login.html', form=form)
+#
+
+
+@auth.route('logout')
 @login_required
 @register_menu(auth, 'user.logout', 'Logout', order=0, type="user", visible_when=lambda: current_user.is_authenticated)
 def logout():

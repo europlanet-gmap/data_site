@@ -13,18 +13,12 @@
             </div>
             <div class="col-md-4">
                 <div class="card mb-3 w-100 bg-light">
-
-
-                    <div class="card-header"><h4>Login</h4>
-
-                        <p class="text-muted"> Log in by using the credentials for your <a href="https://git.europlanet-gmap.eu/">GMAP-GitLab account</a>  </p>
-
-                    </div>
-                    <div class="card-body text-center">
-
+                    <div class="card-header"><h4>Login</h4></div>
+                    <div class="card-body">
                         {{ render_form(form) }}
                         <hr>
-                        <p class="small"><a href="https://git.europlanet-gmap.eu/users/sign_in#register-pane">Register new account</a></p>
+                        <p class="small"><a href="{{ url_for('.register') }}">Register new account</a></p>
+{#                        <p class="small"><a href="{{ url_for('.forget_password') }}">Forget password</a></p>#}
                     </div>
                 </div>
             </div>

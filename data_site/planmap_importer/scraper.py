@@ -2,7 +2,10 @@ import requests
 
 from bs4 import BeautifulSoup
 
-import attr
+import attr, markdown
+
+import numpy as np
+import pandas
 
 from joblib import Memory
 memory = Memory("/tmp", verbose=0)
@@ -157,6 +160,44 @@ def append_thumb_url(bb):
                 map.thumb_url = map.url + "/" + "document/" + thumb
 
 
+def match_items_from_table(table, toget=["title", "pm_id", "author", "body", "desc", "type"]):
+    o = {}
+    t = table.replace(np.nan, "")
+    for item in toget:
+        try:
+            title = t.query(f'Field.str.lower().str.contains("{item}")', engine='python').values[0][1]
+            if item == "author":
+                title = title.split(",")
+
+            title = title.strip()
+        except:
+            title = ""
+
+        if title == "":
+            print(f"missing {item}")
+
+        o[item] = title
+    return o
+
+
+def parse_readme(markdown_text):
+    html = markdown.markdown(markdown_text, extensions=["tables"])
+
+    tabs = pandas.read_html(html)
+
+    id = np.argmax([len(t) for t in tabs])
+    t = tabs[id]
+
+    o = match_items_from_table(t)
+
+    return o
+
+
+def parse_metadata(maps):
+    for body in maps:
+        for p in body.maps:
+            o = parse_readme(p.readme)
+            p.metadata = o
 
 # @memory.cache
 def scrape_maps():
@@ -166,5 +207,6 @@ def scrape_maps():
     append_readme(bb)
     select_thumbnails(bb)
     append_thumb_url(bb)
+    parse_metadata(bb)
 
     return bb

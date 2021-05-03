@@ -26,13 +26,24 @@ def import_planmap_packages():
     for body in bodies:
         for map in body.maps:
             print(map.name)
+            print(body.name)
 
 
+            from data_site.models import PlanetaryBody
+            from sqlalchemy import func
+            f = PlanetaryBody.query.filter_by(name=func.lower(body.name)).first()
+            if f is None:
+                id = 1
+            else:
+                id = f.id
+
+            import markdown
             p = DataPackage(name=map.name, creator_id=user.id,
-                            planetary_body=body.name, body=map.readme,
+                            planetary_body_id=id, description=markdown.markdown(map.readme, extensions=["tables"]),
                             thumbnail_url=map.thumb_url)
             db.session.add(p)
-            db.session.commit()
+
+    db.session.commit()
 
 
 @click.command("remove-planmap")

@@ -26,6 +26,9 @@ class LoginForm(FlaskForm):
     remember_me = BooleanField('Remember me')
     submit = SubmitField('Log in')
 
+class LoginFormGitlab(FlaskForm):
+    submit = SubmitField('Log in via GMAP Gitlab')
+
 
 class RegisterForm(FlaskForm):
     # name = StringField('Name', validators=[DataRequired(), Length(1, 30)])
@@ -66,6 +69,8 @@ class RegisterForm(FlaskForm):
     def validate_username(self, field):
         if User.query.filter_by(username=field.data).first():
             raise ValidationError('The username is already in use.')
+
+
 class PackageForm(FlaskForm):
     """
     Form for package submission

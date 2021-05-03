@@ -36,6 +36,10 @@ flask-paginate = "*"
 flask-admin = "*"
 flask-menu = "*"
 blinker = "*"
+pandas = "*"
+attr = "*"
+authlib = "*"
+python-gitlab = "*"
 
 [dev-packages]
 

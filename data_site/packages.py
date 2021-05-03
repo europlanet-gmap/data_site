@@ -77,7 +77,7 @@ def all_packages():
 
     from .models import DataPackage
 
-    bodies= get_unique_values_for_form(DataPackage.planetary_body, label="planetary_body")
+    bodies= get_unique_values_for_form(DataPackage.planetary_body_id, label="planetary_body")
     form.set_bodies(bodies)
 
     creators = get_unique_values_for_form(User.username, label="username")
@@ -125,16 +125,13 @@ def view(id):
 
     from markdown import markdown
 
-    if pack.body is not None:
-        body = pack.body
+    if pack.description is not None:
+        body = pack.description
     else:
-        body = "# No description for this package"
-
-    ashtml = markdown(body, extensions=['tables'])
-    print(type(ashtml))
+        body = "<h6> No description for this package </h6>"
 
 
-    return render_template("packages/view.html", package_name=pack.name, description=Markup(ashtml))
+    return render_template("packages/view.html", package_name=pack.name, description=Markup(body))
 
 
 @packages.route('/create', methods=('GET', 'POST'))
