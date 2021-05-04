@@ -73,14 +73,15 @@ def handle_authorize(remote, token, user_info):
 
     if user_info:
         user = User.query.filter_by(email=user_info["email"]).first()
-        if user is not None and login_user(user, True):
+        if user is not None:
+            login_user(user, True)
             flash('Login success.', 'info')
 
-            import gitlab
-            gl = gitlab.Gitlab('https://git.europlanet-gmap.eu', oauth_token=token["access_token"])
-            gl.auth()
-            uid = gl.user.id
-            print(f"--- > uid {uid}")
+            # import gitlab
+            # gl = gitlab.Gitlab('https://git.europlanet-gmap.eu', oauth_token=token["access_token"])
+            # gl.auth()
+            # uid = gl.user.id
+            # print(f"--- > uid {uid}")
 
             # import requests
             # o = requests.get("https://git.europlanet-gmap.eu/api/v4/groups", auth=auth)
@@ -89,9 +90,11 @@ def handle_authorize(remote, token, user_info):
 
             return redirect(url_for("main.index"))
         else:
-            user = User(email = user_info["email"])
+            user = User(email = user_info["email"], username=user_info["preferred_username"])
             db.session.add(user)
             db.session.commit()
+            login_user(user, True)
+            return redirect(url_for("main.index"))
 
     else:
         flash("Login unsuccessful. Please try again")

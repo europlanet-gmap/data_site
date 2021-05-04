@@ -40,6 +40,8 @@ pandas = "*"
 attr = "*"
 authlib = "*"
 python-gitlab = "*"
+flask-flatpages = "*"
+flask-mdeditor = "*"
 
 [dev-packages]
 

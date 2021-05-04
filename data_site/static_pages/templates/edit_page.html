@@ -1,0 +1,19 @@
+{%  extends "base.html" %}
+
+{% block head %}
+{#{{ pagedown.include_pagedown() }}#}
+{% endblock %}
+
+{% block content %}
+
+    <h6> Editing {{ title }} </h6>
+
+
+    <form method="POST">
+        {{ form.csrf_token }}
+        {{ form.content() }}
+        {{ form.submit() }}
+    </form>
+
+
+{% endblock %}

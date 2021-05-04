@@ -1,45 +1,44 @@
 {% for item in current_menu.children recursive %}
-            {% if item.visible %}
+    {% if item.visible %}
 
+        {% if item.parent == current_menu and item.children | count == 0 %}
+            {% if item.type ==  type  %}
+                <li class="nav-item">
+                    <a class="nav-link" href="{{ item.url }}">{{ item.text }}</a>
+                </li>
+            {% endif %}
+        {% elif item.parent != current_menu and item.children | count == 0 %}
+            <li>
+                <a class="dropdown-item" href="{{ item.url }}"> {{ item.text }}  </a>
+            </li>
+        {% elif item.parent == current_menu and item.children | count > 0 %}
+            {% if item.type == type %}
+                <li class="nav-item dropdown">
+                    <a class="nav-link dropdown-toggle dropdown-toggle-split" id="{{ item.text }}"
+                       href="{{ item.url }}"
+                       data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                        {{ item.text }}
+                    </a>
 
-                {% if item.parent == current_menu and item.children | count == 0 %}
-                    {% if item.type ==  type  %}
-                        <li class="nav-item">
-                            <a class="nav-link" href="{{ item.url }}">{{ item.text }}</a>
-                        </li>
-                    {% endif %}
-                {% elif item.parent != current_menu and item.children | count == 0 %}
-                    <li>
-                        <a class="dropdown-item" href="{{ item.url }}"> {{ item.text }}  </a>
-                    </li>
-                {% elif item.parent == current_menu and item.children | count > 0 %}
-                    {% if item.type == type %}
-                        <li class="nav-item dropdown">
-                            <a class="nav-link dropdown-toggle dropdown-toggle-split" id="{{ item.text }}"
-                               href="{{ item.url }}"
-                               data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
-                                {{ item.text }}
-                            </a>
+                    <ul class="dropdown-menu" aria-labelledby="{{ item.text }}">
+                        {{ loop(item.children) }}
+                    </ul>
 
-                            <ul class="dropdown-menu" aria-labelledby="{{ item.text }}">
-                                {{ loop(item.children) }}
-                            </ul>
+                </li>
+            {% endif %}
 
-                        </li>
-                    {% endif %}
+        {% elif item.parent != current_menu and item.children | count > 0 %}
+            <li>
+                <a class="dropdown-item dropdown-toggle" href="{{ item.url }}">
+                    {{ item.text }}
+                </a>
+                <ul class="dropdown-menu">
+                    {{ loop(item.children) }}
+                </ul>
+            </li>
 
-                {% elif item.parent != current_menu and item.children | count > 0 %}
-                    <li>
-                        <a class="dropdown-item dropdown-toggle dropdown-toggle-split  " href="{{ item.url }}">
-                            {{ item.text }}
-                        </a>
-                        <ul class="dropdown-menu">
-                            {{ loop(item.children) }}
-                        </ul>
-                    </li>
+        {% endif %}
 
-                {% endif %}
+    {%  endif   %}
 
-            {%  endif   %}
-
-        {% endfor %}
+{% endfor %}
