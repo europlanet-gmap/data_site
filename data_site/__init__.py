@@ -84,8 +84,8 @@ def create_app(test_config=None):
     init_commands(app)
 
     # init gitlab oauth integration
-    app.config["GITLAB_CLIENT_ID"] ='***REMOVED***'
-    app.config["GITLAB_CLIENT_SECRET"]='***REMOVED***'
+    app.config["GITLAB_CLIENT_ID"] = os.environ.get("GITLAB_CLIENT_ID")
+    app.config["GITLAB_CLIENT_SECRET"]=os.environ.get("GITLAB_CLIENT_SECRET")
 
     oauth.init_app(app)
 
