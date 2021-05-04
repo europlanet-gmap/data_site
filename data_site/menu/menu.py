@@ -66,6 +66,13 @@ def register_external_menu_items():
     tt._text = "User"
     tt.type = "user"
 
+    tt = current_menu.submenu("user.admin")
+    tt._text = "Admin Dashboard"
+    tt.type = "user"
+    tt._order = 2000
+    tt._endpoint = "admin.index"
+    tt._visible_when = lambda: current_user.is_authenticated  and current_user.is_admin()
+
     tt = current_menu.submenu("packages")
     tt._text = "Packages"
     tt.type = "main"

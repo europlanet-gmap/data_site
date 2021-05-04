@@ -71,28 +71,27 @@ def handle_authorize(remote, token, user_info):
 
     if user_info:
         user = User.query.filter_by(email=user_info["email"]).first()
+
+
+
         if user is not None:
+            if user_info["is_admin"]:
+                print("--> user is admin")
+                user.allow_admin()
+
+
             login_user(user, True)
             flash('Login success.', 'info')
 
-            # import gitlab
-            # gl = gitlab.Gitlab('https://git.europlanet-gmap.eu', oauth_token=token["access_token"])
-            # gl.auth()
-            # uid = gl.user.id
-            # print(f"--- > uid {uid}")
-
-            # import requests
-            # o = requests.get("https://git.europlanet-gmap.eu/api/v4/groups", auth=auth)
-            # return jsonify(o.content)
-
-
-            return redirect(url_for("main.index"))
+            return redirect_back()
         else:
             user = User(email = user_info["email"], username=user_info["preferred_username"])
+            if user_info["is_admin"]:
+                user.allow_admin()
             db.session.add(user)
             db.session.commit()
             login_user(user, True)
-            return redirect(url_for("main.index"))
+            return redirect_back()
 
     else:
         flash("Login unsuccessful. Please try again")
@@ -227,3 +226,10 @@ def set_random_password(name):
     db.session.commit()
 
     print(f"new password for user {user.username} [{user.email}]: {password}")
+
+
+@auth.cli.command('init_roles')
+def init_roles():
+   print("initlizing roles")
+   from .models import Role
+   Role.init_default_roles()
