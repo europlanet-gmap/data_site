@@ -44,16 +44,16 @@ class MenuManager(object):
 
         app.register_blueprint(menu, url_prefix='/')
 
-        @user_logged_in.connect_via(app)
-        def _after_login_hook(sender, **extra):
-            print("--> exec after login hook")
-            tt = current_menu.submenu("user")
-            tt._text = current_user.username
-
-        @user_logged_out.connect_via(app)
-        def _after_logout_hook(sender, **extra):
-            tt = current_menu.submenu("user")
-            tt._text = "User"
+        # @user_logged_in.connect_via(app)
+        # def _after_login_hook(sender, **extra):
+        #     print("--> exec after login hook")
+        #     tt = current_menu.submenu("user")
+        #     tt._text = current_user.username
+        #
+        # @user_logged_out.connect_via(app)
+        # def _after_logout_hook(sender, **extra):
+        #     tt = current_menu.submenu("user")
+        #     tt._text = "User"
 
 
 def register_external_menu_items():
@@ -63,11 +63,7 @@ def register_external_menu_items():
     tt.type = "main"
 
     tt = current_menu.submenu("user")
-
-    if current_user.is_authenticated:
-        tt._text = current_user.username
-    else:
-        tt._text = "User"
+    tt._text = "User"
     tt.type = "user"
 
     tt = current_menu.submenu("packages")

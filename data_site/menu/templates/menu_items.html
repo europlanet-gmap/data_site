@@ -17,7 +17,11 @@
                     <a class="nav-link dropdown-toggle dropdown-toggle-split" id="{{ item.text }}"
                        href="{{ item.url }}"
                        data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
-                        {{ item.text }}
+                        {% if item.text == "User" %}
+                            {{ current_user.username if current_user.is_authenticated else "User" }}
+                        {% else %}
+                            {{ item.text }}
+                        {% endif %}
                     </a>
 
                     <ul class="dropdown-menu" aria-labelledby="{{ item.text }}">
