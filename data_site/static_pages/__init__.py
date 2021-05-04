@@ -1,13 +1,9 @@
 from flask import Blueprint, render_template, current_app, send_from_directory, url_for, redirect
-from flask.cli import with_appcontext
-from flask_flatpages import FlatPages
 from flask_mdeditor import MDEditor, MDEditorField
 from flask_menu import current_menu
-from flask_pagedown import PageDown
 from wtforms.validators import DataRequired
 
 pages = Blueprint("static_pages", __name__, template_folder="templates")
-from docutils.core import publish_parts
 from flask_flatpages import FlatPages
 
 from .markdown_processing import md_renderer
@@ -86,28 +82,16 @@ class Pages(object):
 @pages.route("/pages/<path:page_path>")
 @pages.route("/pages/<path:page_path>.md")
 def getpage(page_path):
-    print(f"args --> {page_path}")
-
     from .. import pages
     p  = pages.pages.get(page_path)
 
-
     if p:
-        print(f"--> page {p}")
-        print(f"________ {dir(p)}")
-
-        els = [a for a in dir(p) if not a.startswith('__') and not callable(getattr(p, a))]
-        for el in els:
-            print(getattr(p, el))
-
         return render_template("page.html", page = p)
 
     else:
-
         return send_from_directory('static/pages', page_path)
 
 from flask_wtf import Form
-from flask_pagedown.fields import PageDownField
 from wtforms.fields import SubmitField
 
 class PageDownFormExample(Form):
@@ -133,7 +117,6 @@ def editpage(page_path):
 
     if form.validate_on_submit():
         text = form.content.data
-        print("edited")
         # do something interesting with the Markdown text
 
         return redirect(url_for("static_pages.getpage", page_path=page_path))
