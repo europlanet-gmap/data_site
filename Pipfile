@@ -44,6 +44,8 @@ flask-flatpages = "*"
 flask-mdeditor = "*"
 loginpass = "*"
 pygments = "*"
+flask-email = "*"
+flask-mail = "*"
 
 [dev-packages]
 

@@ -165,9 +165,14 @@ class User(db.Model, UserMixin):
         if admin_role:
             self.role = admin_role
 
+    @property
     def is_admin(self):
         admin_role = Role.get_admin_role()
         return self.role == admin_role
+
+    def can(self, permission_name):
+        permission = Permission.query.filter_by(name=permission_name).first()
+        return permission is not None and self.role is not None and permission in self.role.permissions
 
 
 

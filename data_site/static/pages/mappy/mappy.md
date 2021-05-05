@@ -1,8 +1,6 @@
 title: Mappy tutorial
 category: Documentation.Mapping
 
-
-
 Mappy is a QGIS plugin that simplify some useful operations needed to create geological maps by the point-and-contacts principle.
 
 ## Initial setup
@@ -36,7 +34,7 @@ The layers can be created in any format supported by QGIS (e.g. ESRI Shapefiles)
 
 Creating a new geopackage layer in QGIS with one point layer named ```points```, with one field ```geo_units```of type ```Text Data```. Once the geopackage is created new layers can be appended to the same file by selecting the same ```Database``` geopackage. The same operation should be performed for creating the line layer that will contain the contacts. **Remember to set a meaningful CRS for the layer**.
 
-</figcaption>  
+</figcaption> 
 
 
 
@@ -54,7 +52,7 @@ Assuming you have already loaded your basemaps you can now start tracing your co
 
 Example of linework on the [Olympus Mons](https://en.wikipedia.org/wiki/Olympus_Mons) volcanic edifice on Mars, we used the lines to define the contacts between different morphological units. Notice that the linework does not need to be precise (here exaggerated), we just need the line to be intersecting to correctly define the units. Also multiple lines can be used to define one contact, provided they all intersect each other (see the calderas on the summit).
 
-</figcaption>  
+</figcaption> 
 
 
 ## Defining indicator points
@@ -73,11 +71,12 @@ and populate the points layer. If you want you can setup dedicated field widget 
 
 
 ![form](imgs/forms_example.png)
+
 <figcaption> 
 
 Example of attribute form set up with the predefined unit's names (notice you can also create them as a CSV file to load).
 
-</figcaption>  
+</figcaption> 
 
 After enabling the point layer for editing we add new points by left-clicking with the mouse in the location of interest. You must activate the adequate tool for adding new points (look for `Add Point Feature` button or use `CTRL+.`). For each unit you will need to enter the corresponding unit. If you set up a dedicated `Attribute form` the dialog will look something like this: 
 
@@ -87,7 +86,7 @@ After enabling the point layer for editing we add new points by left-clicking wi
 
 Example of Feature Attribute Dialog, customized with a `Value Map` field widget. It ensures no wrong codes can can be inserted into the database.
 
-</figcaption>  
+</figcaption> 
 
 
 After adding all the needed points the results should be something like this:
@@ -98,7 +97,7 @@ After adding all the needed points the results should be something like this:
 
 Example of points used to define the names of the units. Short-codes were used to uniquely identify the unit. To show the labels follow `Right-Click on layer> Properties> Labels` and configure accordingly.
 
-</figcaption>  
+</figcaption> 
 
 
 Remember to save the layers by using the `Save Layer Edit` in the `Digitizing` toolbar.
@@ -169,7 +168,7 @@ For this task mappy provides the `Remove Dangles` tool which can remove any dang
 
 In this example we cleaned the original contacts with `Remove Dangles` and used a different style depending on the `type` attribute of the contacts. This feature make it possible to re-use the contacts for layout purposes. Notice you might want to set the `Stroke Stile` to `No Pen` for the polygonal layer, or the contacts will be duplicated multiple times.
 
-</figcaption>  
+</figcaption> 
 
 
 

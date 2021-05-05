@@ -4,7 +4,7 @@ from flask import Flask, redirect
 
 from flask_babel import Babel
 from flask_bootstrap import Bootstrap
-from flask_login import LoginManager
+from flask_login import LoginManager, AnonymousUserMixin, current_user
 from flask_migrate import Migrate
 from flask_sqlalchemy import SQLAlchemy
 from loginpass import create_flask_blueprint, create_gitlab_backend
@@ -14,12 +14,17 @@ from .commands import init_commands
 from .planmap_importer import init_app as planmap_importer_init
 from .static_pages import Pages
 
+from flask_mail import Mail, Message
+
+mail = Mail()
+
 pages = Pages()
 
 db = SQLAlchemy()
 bootstrap = Bootstrap()
 migrate = Migrate()
 babel = Babel()
+login_manager = LoginManager()
 
 from .menu import MenuManager
 
@@ -78,14 +83,39 @@ def create_app(test_config=None):
 
     babel.init_app(app)
 
+    app.config['MAIL_SERVER'] = 'smtp.gmail.com'
+    app.config['MAIL_PORT'] = 465
+    app.config['MAIL_USERNAME'] = os.environ.get("MAIL_USERNAME"  )
+    app.config['MAIL_PASSWORD'] = os.environ.get("MAIL_PASSWORD"  )
+    app.config['MAIL_USE_TLS'] = False
+    app.config['MAIL_USE_SSL'] = True
+    app.config['MAIL_DEFAULT_SENDER'] = "europlanet.gmap@gmail.com"
+
+    app.config['MAIL_PREPEND'] = "[GMAP DATA]"
+
+    @app.route("/send")
+    def send_test_email():
+        from .emails import send_mail   
+        body = '''
+# test
+        
+        
+this is a test message
+        
+testing the email send
+        '''
+        m = send_mail("luca.penasa@gmail.com",subject="test message",body=body, body_is_markdown=True, to_user=current_user)
+        return m
+
+    mail.init_app(app)
 
     planmap_importer_init(app)
 
     init_commands(app)
 
     # init gitlab oauth integration
-    app.config["GITLAB_CLIENT_ID"] = os.environ.get("GITLAB_CLIENT_ID")
-    app.config["GITLAB_CLIENT_SECRET"]=os.environ.get("GITLAB_CLIENT_SECRET")
+    app.config["GITLAB_CLIENT_ID"] = os.environ.get("GITLAB_CLIENT_ID"  )
+    app.config["GITLAB_CLIENT_SECRET"]= os.environ.get("GITLAB_CLIENT_SECRET")
 
     oauth.init_app(app)
 
@@ -147,7 +177,7 @@ def create_app(test_config=None):
 
     create_database(app)
     # logins management
-    login_manager = LoginManager()
+
     login_manager.login_view = 'auth.login'
     login_manager.init_app(app)
 
@@ -189,4 +219,13 @@ def create_test_admin(db):
     ad.set_password("admin")
     # ad.role
 
+class GuestUser(AnonymousUserMixin):
+    def can(self, permission_name):
+        return False
 
+    @property
+    def is_admin(self):
+        return False
+
+
+login_manager.anonymous_user = GuestUser

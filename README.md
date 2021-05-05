@@ -61,6 +61,7 @@ $ flask remove-planmap
 # TODO
 
 - [ ] Make a frontpage (index) with a minimal form (eg, "{ name: <> }")
+- [ ] Use Flask-email to send out emails
 
 
 # modules to consider

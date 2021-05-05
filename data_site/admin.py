@@ -14,7 +14,7 @@ from wtforms import validators
 
 class AdminViewBase(ModelView):
     def is_accessible(self):
-        return  current_user.is_authenticated and current_user.is_admin()
+        return  current_user.is_admin
 
     column_hide_backrefs = False
 

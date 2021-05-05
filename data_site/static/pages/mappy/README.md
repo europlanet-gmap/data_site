@@ -26,7 +26,11 @@ Depending on the scope of the geological survey the cartography can depict diffe
 
 
 ![rembrandt_map](imgs/PM-MER-SI-Rembrandt_01.browse.png)
-<figcaption> An example of a geological map realized on Mercury </figcaption>
+<figcaption> 
+
+An example of a geological map realized on Mercury 
+
+</figcaption>
 
 
 
@@ -83,7 +87,11 @@ Starting from these observations it is possible to establish a different methodo
 4. Any number of different segments can be used to define a single contact (provided they intersect somehow), making it possible to assign different attributes to different portions of the same contact (i.e. if the contact is certain in some parts and uncertain in others). This is especially important for styling the contacts in the final layout. 
 
 ![mapping_polygons](imgs/drawing.svg)
-<figcaption>Creating maps by using lines and points rather than polygons</figcaption>
+<figcaption>
+
+Creating maps by using lines and points rather than polygons
+
+</figcaption>
 
 
 
