@@ -4,38 +4,34 @@ from flask import Flask, redirect
 
 from flask_babel import Babel
 from flask_bootstrap import Bootstrap
-from flask_login import LoginManager, AnonymousUserMixin, current_user
+from flask_login import LoginManager
 from flask_migrate import Migrate
 from flask_sqlalchemy import SQLAlchemy
+from flask_wtf.csrf import CSRFProtect
+from flask_mail import Mail, Message
 from loginpass import create_flask_blueprint, create_gitlab_backend
 
-from .commands import init_commands
-
-from .planmap_importer import init_app as planmap_importer_init
-from .static_pages import Pages
-
-from flask_mail import Mail, Message
-
-mail = Mail()
-
-pages = Pages()
+from authlib.integrations.flask_client import OAuth
 
 db = SQLAlchemy()
-bootstrap = Bootstrap()
-migrate = Migrate()
-babel = Babel()
-login_manager = LoginManager()
 
-from .menu import MenuManager
+from data_site.admin import AdminViews, DataPackageView
+from data_site.commands import init_commands
+from data_site.menu import MenuManager
+from data_site.planmap_importer import init_app as planmap_importer_init
+from data_site.static_pages import Pages
 
-menu_manager = MenuManager()
 
-from .admin import AdminViews
 
 admin = AdminViews()
-
-
-from authlib.integrations.flask_client import OAuth
+babel = Babel()
+bootstrap = Bootstrap()
+csrf = CSRFProtect()
+menu_manager = MenuManager()
+migrate = Migrate()
+pages = Pages()
+login_manager = LoginManager()
+mail = Mail()
 
 oauth= OAuth()
 Gitlab = create_gitlab_backend("gitlab", "git.europlanet-gmap.eu")
@@ -57,24 +53,7 @@ def normalize_userinfo(client, data):
     }
 
 Gitlab.OAUTH_CONFIG["userinfo_compliance_fix"] = normalize_userinfo
-
-
 backends = [Gitlab]
-
-#
-
-
-
-
-
-# def handle_authorize(remote, token, user_info):
-    # if token:
-    #     save_token(remote.name, token)
-    # if user_info:
-    #     save_user(user_info)
-    #     return user_page
-    # raise some_error
-
 
 def create_app(test_config=None):
     # create and configure the app
@@ -95,7 +74,7 @@ def create_app(test_config=None):
 
     @app.route("/send")
     def send_test_email():
-        from .emails import send_mail   
+        from .emails import send_mail
         body = '''
 # test
         
@@ -114,16 +93,11 @@ testing the email send
     init_commands(app)
 
     # init gitlab oauth integration
-    app.config["GITLAB_CLIENT_ID"] = os.environ.get("GITLAB_CLIENT_ID"  )
+    app.config["GITLAB_CLIENT_ID"] = os.environ.get("GITLAB_CLIENT_ID")
     app.config["GITLAB_CLIENT_SECRET"]= os.environ.get("GITLAB_CLIENT_SECRET")
 
     oauth.init_app(app)
 
-    # @app.route('/gitlab')
-    # def index():
-    #     tpl = '<li><a href="/login/{}">{}</a></li>'
-    #     lis = [tpl.format(b.NAME, b.NAME) for b in backends]
-    #     return '<ul>{}</ul>'.format(''.join(lis))
     from .auth import handle_authorize
     bp = create_flask_blueprint(backends, oauth, handle_authorize)
     app.register_blueprint(bp, url_prefix='')
@@ -137,7 +111,11 @@ testing the email send
         DATABASE_PATH=db_path,
         SQLALCHEMY_DATABASE_URI=f"sqlite:///{db_path}")
 
+    babel.init_app(app)
+    csrf.init_app(app)
     db.init_app(app)
+
+    planmap_importer_init(app)
 
     migrate.init_app(app, db)
 
@@ -197,12 +175,7 @@ testing the email send
     def testing():
         return redirect("admin.datapackage.new")
 
-
-
     return app
-
-
-from .admin import DataPackageView
 
 
 def create_database(app):

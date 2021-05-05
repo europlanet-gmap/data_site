@@ -1,4 +1,4 @@
-from flask import Blueprint, render_template
+from flask import Blueprint, render_template, redirect
 
 main = Blueprint('main', __name__)
 from . import menu_manager

@@ -1,7 +1,7 @@
 from flask import current_app, flash
 from werkzeug.security import generate_password_hash, check_password_hash
 
-from . import db
+from data_site import db
 from flask_login import UserMixin, current_user
 from sqlalchemy.sql import func
 
@@ -133,7 +133,6 @@ class DataPackage(db.Model):
 
     def __repr__(self):
         return self.name
-
 
 
 

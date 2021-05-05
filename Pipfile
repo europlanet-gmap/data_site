@@ -46,6 +46,7 @@ loginpass = "*"
 pygments = "*"
 flask-email = "*"
 flask-mail = "*"
+lxml = "*"
 
 [dev-packages]
 

@@ -1,25 +1,49 @@
 import os
+import shutil
+import simplejson as json
 
 from flask import (
-    Blueprint, flash, g, redirect, render_template, request, url_for,
-    current_app, session
+    Blueprint,
+    current_app,
+    flash,
+    g,
+    redirect,
+    render_template,
+    request,
+    session,
+    url_for,
 )
 
-
 from flask_login import current_user
+from flask_menu import register_menu
+from flask_paginate import Pagination, get_page_args
+
 from markupsafe import Markup
+from markdown import markdown, Markdown
 
 from werkzeug.exceptions import abort
-from werkzeug.utils import secure_filename
-from . import db
-from data_site.auth import login_required
-from data_site import form
-from .forms import SearchForm
-from .models import DataPackage, User
 
-from flask_paginate import Pagination, get_page_args
-from flask_menu import register_menu
-from .forms import PackageForm
+from data_site import db, form, utils
+from data_site.auth import login_required
+
+from data_site.forms import PackageForm, SearchForm, UploadFile
+from data_site.models import DataPackage, User
+
+
+
+def flash_errors(form):
+    """Flashes form errors"""
+    try:
+        for field, errors in form.errors.items():
+            for error in errors:
+                flash(u"Error in the %s field - %s" % (
+                    getattr(form, field).label.text,
+                    error
+                    ),
+                    'error'
+                )
+    except:
+        print("No errors found.")
 
 
 packages = Blueprint('packages', __name__)
@@ -28,12 +52,8 @@ packages = Blueprint('packages', __name__)
 @packages.route('/packages', methods=["GET"])
 @register_menu(packages, 'packages.list', 'Packages List', order=10, type="main")
 def index():
-
     s = request.args.get('sort', 'id')
     direction = request.args.get('direction', 'id')
-
-
-
     # sort = creation_date & direction = asc
     from sqlalchemy import asc, desc
     if direction =="desc":
@@ -42,11 +62,8 @@ def index():
         sf = asc
     packs = DataPackage.query.order_by(sf(s)).all()
 
-    from .tables import PackageItemTable
-
-
+    from data_site.tables import PackageItemTable
     table = PackageItemTable(packs)
-    print(table)
 
     return render_template('packages/index.html', table=table)
 
@@ -118,20 +135,86 @@ def all_packages():
 
 @packages.route("/<int:id>/record")
 def view(id):
-
-    from .models import DataPackage
-
     pack = DataPackage.query.filter_by(id=id).first()
 
-    from markdown import markdown
-
+    # Luca stuff
+    # ----------
+    # from markdown import markdown
+    #
     if pack.description is not None:
         body = pack.description
+    # else:
+    #     body = "<h6> No description for this package </h6>"
+    #
+    #
+    # return render_template("packages/view.html", package_name=pack.name, description=Markup(body))
+
+    # Carlos stuff
+    # ------------
+    # if pack.body is not None:
+    #     body = pack.body
     else:
-        body = "<h6> No description for this package </h6>"
+        body = "# No description for this package"
+
+    body_js = json.loads(body)
+    body_str = "|Field|Value|\n|:---|---:|\n"
+    for key,value in body_js.items():
+        field = key.replace('_',' ').capitalize()
+        body_str += f"|{field}|{value}|\n"
+    ashtml = markdown(body_str, extensions=['tables'])
+    print(body_str)
+    print(ashtml)
+
+    return render_template("packages/view.html", package_name=pack.name, description=Markup(ashtml))
 
 
-    return render_template("packages/view.html", package_name=pack.name, description=Markup(body))
+
+
+class PackageData:
+    def __init__(self, meta, data):
+        self.meta = meta
+        self.data = data
+        self.base_path = current_app.config['UPLOAD_FOLDER']
+
+    def commit(self):
+        # Write meta/data to disk
+        pkg_path = os.path.join(self.base_path, self.meta['gmap_id'].lower())
+        os.makedirs(pkg_path, exist_ok=True)
+        self._write_meta(under=pkg_path)
+        self._write_data(under=pkg_path)
+
+        # Write metadata as readme/markdown to database
+        creator_id=current_user.id,
+        planetary_body=self.meta['target_body'],
+        description=json.dumps(self.meta)
+        p = DataPackage(name=self.meta['name'],
+                        creator_id=creator_id,
+                        # planetary_body=planetary_body,
+                        description=description
+                        )
+        db.session.add(p)
+        db.session.commit()
+        return p.id
+
+    def _write_meta(self,under):
+        assert self.meta, "Package fields/metadata is not (yet) defined"
+        pkg_file = os.path.join(under, 'meta.json')
+        with open(pkg_file, 'w') as fp:
+            json.dump(self.meta, fp)
+
+    def _write_data(self,under):
+        if self.data:
+            assert 'dir' in self.data
+            assert 'files' in self.data
+            temp_dir = self.data['dir']
+            dest_dir = os.path.join(under, 'data')
+            for fname in self.data['files']:
+                temppath = os.path.join(temp_dir, fname)
+                destpath = os.path.join(dest_dir, fname)
+                shutil.move(temppath, destpath)
+
+    def __del__(self):
+        shutil.rmtree(self.data['dir'])
 
 @packages.route('/create2', methods=('GET', 'POST'))
 @register_menu(packages, 'user.create2', 'New Package 2', order=100, visible_when=lambda: current_user.is_authenticated)
@@ -143,69 +226,49 @@ def create2():
 @packages.route('/create', methods=('GET', 'POST'))
 @register_menu(packages, 'user.create', 'New Package', order=100, visible_when=lambda: current_user.is_authenticated)
 @login_required
-def create(values={'files':None, 'metadata':None}):
-    # if request.method == 'POST':
-    #     form_files = None
-    #     form_metadata = None
-    #     error = None
-    #     if '_form_metadata' in request.form:
-    #         _form = request.form.copy()
-    #         _form.pop('_form_metadata')
-    #         errors = []
-    #         try:
-    #             form_parsed = form.parse(_form)
-    #             print(form_parsed)
-    #             form_ok = form.validate(form_parsed, errors)
-    #             print(f"Form ok {form_ok}")
-    #         except Exception as err:
-    #             raise err
-    #         else:
-    #             values['metadata'] = form_parsed
-    #         if  form_ok is not None:
-    #             assert errors, errors
-    #             [ flash(e) for e in errors ]
-    #         else:
-    #             flash('success')
-    #
-    #             from .models import DataPackage
-    #
-    #             pack = DataPackage(name=form_parsed["gmap_id"], creator_id=current_user.id)
-    #             from . import db
-    #             db.session.add(pack)
-    #             db.session.commit()
-    #
-    #             # db = get_db()
-    #             # db.execute(
-    #             #     'INSERT INTO post (title, body, author_id)'
-    #             #     ' VALUES (?, ?, ?)',
-    #             #     (title, body, g.user['id'])
-    #             # )
-    #             # db.commit()
-    #             return redirect(url_for('index'))
-    #     else:
-    #         assert '_form_upload' in request.form
-    #         # _form = request.form.copy()
-    #         # _form.pop('_form_upload')
-    #         # check if the post request has the file part
-    #         if 'file' not in request.files:
-    #             flash('No file selected')
-    #             return redirect(request.url)
-    #         file = request.files['file']
-    #         # if user does not select file, browser also
-    #         # submit an empty part without filename
-    #         if file.filename == '':
-    #             flash('No file selected')
-    #             return redirect(request.url)
-    #         if file and form.allowed_file(file.filename):
-    #             filename = secure_filename(file.filename)
-    #             localpath = os.path.join(current_app.config['UPLOAD_FOLDER'], filename)
-    #             file.save(localpath)
-    #             values['files'] = values['files'] + [filename] if values['files'] else [filename]
-    #
-    # return form.render(metadata=values['metadata'], files=values['files'])
+def create():
+    """
+    Handles package meta/data fields/files
+    """
+    upload = UploadFile()
     form = PackageForm()
-    if request.method == 'GET':
-        return render_template('packages/create.html', form=form)
+
+    if 'data' not in session:
+        session['data'] = {}
+
+    # Handle file upload
+    if upload.validate_on_submit():
+        if upload.file.data:
+            if 'files' not in session['data']:
+                session['data'].update({'dir':utils.mkdtemp(), 'files':[]})
+            filename = utils.save_file(upload.file.data, dir=session['data']['dir'])
+            session['data']['files'].append(filename)
+
+    # Handle form submit
+    if form.validate_on_submit():
+        # Clean out wtform related fields from data of interest
+        meta = {k:v for k,v in form.data.items()
+                    if k not in ('submit','csrf_token')}
+        # If data files were uploaded, use them
+        data = session['data'] if 'data' in session else None
+        # Initialize a "package" object to handle the writing (filesystem & database)
+        pkg = PackageData(meta=meta, data=data)
+        pack_id = pkg.commit()
+        del pkg, session['data']
+        # Assuming everything is good, redirect user to new package's view
+        return redirect(url_for('packages.view', id=pack_id))
+
+    if form.errors:
+        flash_errors(form)
+
+    try:
+        files = session['data']['files']
+    except:
+        files = []
+    return render_template('packages/create.html',
+                            upload=upload, form=form,
+                            files=files
+                            )
 
 
 def get_post(id, check_author=True):
@@ -231,10 +294,6 @@ def update(id):
     flash(f"Tring to modify package {id}", "info")
     return redirect(url_for('packages.index'))
     post = get_post(id)
-
-
-
-
     if request.method == 'POST':
         title = request.form['title']
         body = request.form['body']

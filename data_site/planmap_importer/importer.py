@@ -45,7 +45,7 @@ def import_planmap_packages():
             db.session.add(p)
 
     db.session.commit()
-    logout_user()
+    # logout_user()
 
 
 
@@ -60,5 +60,3 @@ def remove_planmap_entries():
     for p in packs:
         db.session.delete(p)
         db.session.commit()
-
-

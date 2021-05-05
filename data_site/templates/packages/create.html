@@ -2,60 +2,79 @@
 {% from 'bootstrap/form.html' import render_form %}
 
 {% block header %}
-  <h1>{% block title %}New Package{% endblock %}</h1>
+  {% block title %}
+    <h1>
+      New Package
+    </h1>
+  {% endblock %}
 {% endblock %}
 
 {% block content %}
- <div class="jumbotron">
-        <div class="row">
-            <div class="col-md-8 ">
-                <img src="{{ url_for('static', filename='logo.svg') }}" class="rounded img-fluid">
-            </div>
-            <div class="col-md-4">
-                <div class="card mb-3 w-100 bg-light">
-                    <div class="card-header"><h4>Data</h4></div>
-                    <div class="card-body">
-                        {{ render_form(form) }}
-                    </div>
-                </div>
-            </div>
+  <div class="jumbotron">
+    <div class="row">
+      <div class="col-md-8">
+        <div class="card mb-3 w-100 bg-light">
+          <div class="card-header">
+            <h4>Data</h4>
+          </div>
+          <div class="card-body">
+            {{ render_form(form) }}
+          </div>
         </div>
+      </div>
+      <div class="col-md-4">
+        <div class="card mb-3 w-100 bg-light">
+          <div class="card-header">
+            <h4>Data</h4>
+          </div>
+          <div class="card-body">
+            <ul>
+              {% for file in files %}
+                <li>
+                  {{ file }}
+                </li>
+              {% endfor %}
+            </ul>
+            {{ render_form(upload) }}
+          </div>
+        </div>
+      </div>
     </div>
+  </div>
 {% endblock %}
 
 {% block scripts %}
-{{ super() }}
-<script>
-  function replaceInputWhitespaces(e) {
-    // const elem = document.getElementById('name');
-    const elem = e.currentTarget;
-    const value = elem.value.toLowerCase().replace(" ","-");
-    if (value != elem.value) {
-      console.log(`NAME value replaced: ${value},${elem.value}`);
-      elem.value = value;
+  {{ super() }}
+  <script>
+    function replaceInputWhitespaces(e) {
+      // const elem = document.getElementById('name');
+      const elem = e.currentTarget;
+      const value = elem.value.toLowerCase().replace(" ","-");
+      if (value != elem.value) {
+        console.log(`NAME value replaced: ${value},${elem.value}`);
+        elem.value = value;
+      }
     }
-  }
-  $('#name').on('input', function(e){
-    replaceInputWhitespaces(e);
-  })
+    $('#name').on('input', function(e){
+      replaceInputWhitespaces(e);
+    })
 
-  function updateGmapID() {
-    const body = document.getElementById("target_body").value;
-    const _types = document.getElementById("map_type").selectedOptions;
-    // const type = Array.from(_types).map(val => val.charAt(0)).sort().join();
-    const type = Array.from(_types).map(({value}) => value.charAt(0)).sort().join("");
-    const name = document.getElementById("name").value;
-    const v_id = `GM_${body}_${type}_${name}`;
-    document.getElementById("gmap_id").value = v_id;
-  }
-  $('#map_type').on('change', function() {
-    updateGmapID();
-  })
-  $('#name').on('change', function() {
-    updateGmapID();
-  })
-  $('#target_body').on('change', function() {
-    updateGmapID();
-  })
-</script>
+    function updateGmapID() {
+      const body = document.getElementById("target_body").value;
+      const _types = document.getElementById("map_type").selectedOptions;
+      const type = Array.from(_types).map(({value}) => value.charAt(0)).sort().join("");
+      const name = document.getElementById("name").value;
+      const v_id = `GM_${body}_${type}_${name}`;
+      document.getElementById("gmap_id").value = v_id;
+    }
+    $('#map_type').on('change', function() {
+      updateGmapID();
+    })
+    $('#name').on('change', function() {
+      updateGmapID();
+    })
+    $('#target_body').on('change', function() {
+      updateGmapID();
+    })
+  </script>
 {% endblock scripts %}
