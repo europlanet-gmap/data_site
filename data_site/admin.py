@@ -4,12 +4,19 @@ from flask_admin.form import rules
 from flask_login import current_user
 from wtforms import PasswordField
 
-from .models import User, DataPackage, PlanetaryBody, Role, Permission
 from flask_admin.contrib.sqla import ModelView
 from flask_admin import Admin
 
-from data_site import db
 from wtforms import validators
+
+from data_site import db
+from data_site.models import (
+    User,
+    DataPackage,
+    PlanetaryBody,
+    Role,
+    Permission
+    )
 
 
 class AdminViewBase(ModelView):
