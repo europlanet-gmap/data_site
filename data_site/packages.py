@@ -20,10 +20,14 @@ from flask_paginate import Pagination, get_page_args
 
 from markupsafe import Markup
 from markdown import markdown, Markdown
+from sqlalchemy import distinct
+from vedo import Plane
 
 from werkzeug.exceptions import abort
 
-from data_site import db, form, utils
+from data_site import form, utils
+from data_site.extensions import db
+
 from data_site.auth import login_required
 
 from data_site.forms import PackageForm, SearchForm, UploadFile
@@ -67,13 +71,30 @@ def index():
 
     return render_template('packages/index.html', table=table)
 
+def clear_values(values):
+    print(values)
+    values = [b[0] for b in values]
+    values.insert(0, "Any")
+    return [[str(b), str(b).capitalize()] for b in values]
 
 def get_unique_values_for_form(field, label="planetary_body"):
     values = db.session.query(field.distinct().label(label)).filter(field != None).all()
-    values = [b[0] for b in values]
-    values.insert(0,"Any")
-    return [[str(b), str(b).capitalize()] for b in values]
+    return clear_values(values)
 
+def get_unique_values_for_bodies(field):
+    from data_site.models import PlanetaryBody
+    values = db.session.query(DataPackage)\
+        \
+        .all()
+
+
+    return clear_values(values)
+
+
+    # query = db.session.query(distinct(Document.id))\
+    #           .join(DocumentEntity)\
+    #           .filter(DocumentEntity.entity_id == entity.id)\
+    #           .order_by(Document.published_at.desc())
 
 @packages.route('/all-packages/', methods=["GET", "POST"])
 @register_menu(packages, 'packages.packs', 'Packages', order=0, type="main")
@@ -94,7 +115,10 @@ def all_packages():
 
     from .models import DataPackage
 
-    bodies= get_unique_values_for_form(DataPackage.planetary_body_id, label="planetary_body")
+    # bodies= get_unique_values_for_form(DataPackage.planetary_body_id, label="planetary_body")
+    # form.set_bodies(bodies)
+
+    bodies = get_unique_values_for_bodies(DataPackage.planetary_body_id)
     form.set_bodies(bodies)
 
     creators = get_unique_values_for_form(User.username, label="username")
@@ -119,7 +143,7 @@ def all_packages():
         q = q.filter(DataPackage.name.like('%' + query + '%'))
 
     if body != "Any":
-        q = q.filter_by(planetary_body=body)
+        q = q.filter_by(planetary_body_id=body)
 
     if creator != "Any":
         q = q.join(DataPackage.creator, aliased=True) \

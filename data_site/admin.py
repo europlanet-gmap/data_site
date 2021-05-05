@@ -12,18 +12,21 @@ from wtforms import TextAreaField
 from wtforms.widgets import TextArea
 
 
-from data_site import db
-from data_site.models import (
-    User,
-    DataPackage,
-    PlanetaryBody,
-    Role,
-    Permission
-    )
+
 
 
 class AdminViews(object):
     def init_app(self, app):
+        from data_site.models import (
+            User,
+            DataPackage,
+            PlanetaryBody,
+            Role,
+            Permission
+        )
+
+        from data_site.extensions import db
+
         self.admin = Admin(name='data_site', template_mode='bootstrap4')
         self.admin.init_app(app)
 

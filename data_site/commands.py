@@ -2,7 +2,7 @@
 from flask.cli import with_appcontext
 import click
 
-def init_commands(app):
+def register_commands(app):
     app.cli.add_command(update_planetary_bodies_list)
     app.cli.add_command(initialize)
 
@@ -28,7 +28,7 @@ def create_default_entries():
 def update_planetary_bodies_list(force=False):
 
     from .models import PlanetaryBody
-    from . import db
+    from data_site.extensions import db
 
     if force:
         print("OVERWRITING entries")

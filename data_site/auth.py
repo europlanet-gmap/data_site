@@ -7,7 +7,7 @@ from flask_menu import register_menu
 
 from .forms import RegisterForm, LoginForm, LoginFormGitlab
 from .models import User
-from . import db
+from data_site.extensions import db
 from flask_login import login_user, login_required, logout_user, current_user
 
 

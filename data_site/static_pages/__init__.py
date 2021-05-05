@@ -1,12 +1,17 @@
 from flask import Blueprint, render_template, current_app, send_from_directory, url_for, redirect
 from flask_mdeditor import MDEditor, MDEditorField
 from flask_menu import current_menu
+from flask_flatpages import FlatPages
+from flask_wtf import Form
+
+from wtforms.fields import SubmitField
 from wtforms.validators import DataRequired
 
-pages = Blueprint("static_pages", __name__, template_folder="templates")
-from flask_flatpages import FlatPages
+from data_site.static_pages.markdown_processing import md_renderer
 
-from .markdown_processing import md_renderer
+
+
+pages = Blueprint("static_pages", __name__, template_folder="templates")
 
 def register_menu_entries():
     """
@@ -30,7 +35,7 @@ def register_menu_entries():
                 tt.type = "main"
                 tt._order = 10
 
-            tt = tt.submenu(p.meta['title'] )
+            tt = tt.submenu(p.meta['title'])
             tt._text = p.meta['title']
             paths[p] = p.path
 
@@ -41,10 +46,12 @@ def register_menu_entries():
             tt._endpoint_arguments_constructor = generate_method()
             tt._endpoint = "static_pages.getpage"
 
+
 class Pages(object):
     """
     Utility object that handles most of the stuff related to static pages
     """
+
     def init_app(self, app):
         self.pages = FlatPages(app)
         app.extensions["pages"] = self
@@ -52,7 +59,7 @@ class Pages(object):
 
         app.config["FLATPAGES_EXTENSION"] = [".md"]
         app.config["FLATPAGES_ROOT"] = "static/pages"
-        app.config["FLATPAGES_MARKDOWN_EXTENSIONS"]= ['codehilite', 'tables']
+        app.config["FLATPAGES_MARKDOWN_EXTENSIONS"] = ['codehilite', 'tables']
         app.config['FLATPAGES_HTML_RENDERER'] = md_renderer
 
         app.config["FLATPAGES_EXTENSION_CONFIGS"] = {}
@@ -68,46 +75,37 @@ class Pages(object):
         app.config["MDEDITOR_LANGUAGE"] = 'en'
 
         app.config["MDEDITOR_HEIGHT"] = 800
-    # def register_menu_entries(self):
-    #     for p in self.pages:
-    #         if "category" in p.meta.keys():
-    #             tt = current_menu.submenu(p.category)
-    #             tt._text = "Documentation"
-    #             tt.type = "main"
-    #             tt._order = 0
-    #
-    #             print("adding page to menu")
+
 
 
 @pages.route("/pages/<path:page_path>")
 @pages.route("/pages/<path:page_path>.md")
 def getpage(page_path):
-    from .. import pages
-    p  = pages.pages.get(page_path)
+    from data_site.extensions import pages
+    p = pages.pages.get(page_path)
 
     if p:
-        return render_template("page.html", page = p)
+        return render_template("page.html", page=p)
 
     else:
         return send_from_directory('static/pages', page_path)
 
-from flask_wtf import Form
-from wtforms.fields import SubmitField
 
-class PageDownFormExample(Form):
+
+
+
+class MDEditorFormExample(Form):
     """A simple page edit form"""
     content = MDEditorField('Body', validators=[DataRequired()])
     submit = SubmitField('Save')
 
 
-
-
 @pages.route("/pages/edit/<path:page_path>", methods=["GET", "POST"])
 @pages.route("/pages/edit/<path:page_path>.md", methods=["GET", "POST"])
 def editpage(page_path):
-    form = PageDownFormExample()
+    form = MDEditorFormExample()
 
-    from .. import pages
+    from data_site.extensions import pages
     page = pages.pages.get(page_path)
     if page:
         form.content.data = page.body
@@ -122,6 +120,3 @@ def editpage(page_path):
         return redirect(url_for("static_pages.getpage", page_path=page_path))
 
     return render_template('edit_page.html', form=form, title=page_path)
-
-
-

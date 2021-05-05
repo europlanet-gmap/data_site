@@ -1,2 +1,3 @@
 # name, is_planet
 67P/Churyumov-Gerasimenko, False
+Unknown, False

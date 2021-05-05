@@ -1,7 +1,7 @@
 from flask import current_app, flash
 from werkzeug.security import generate_password_hash, check_password_hash
 
-from data_site import db
+from data_site.extensions import db
 from flask_login import UserMixin, current_user
 from sqlalchemy.sql import func
 
@@ -104,6 +104,9 @@ class PlanetaryBody(db.Model):
     def __repr__(self):
         return self.name
 
+    @staticmethod
+    def get_unknwon_body():
+        return PlanetaryBody.query.filter_by(name="unknown").first()
 
 
 
@@ -116,7 +119,7 @@ class DataPackage(db.Model):
     description = db.Column(db.String(1500000))
     # body_format = db.Column(db.String(20), default=None) # format of 'body' content, this will be used for rendering it
     planetary_body_id = db.Column(db.Integer, db.ForeignKey('planetary_body.id'))
-    planetary_body = db.relationship("PlanetaryBody", back_populates="packages")
+    planetary_body = db.relationship("PlanetaryBody", back_populates="packages", lazy="joined")
     thumbnail_url =db.Column(db.String(1000))
 
     @property
