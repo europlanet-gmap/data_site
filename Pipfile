@@ -32,6 +32,14 @@ bs4 = "*"
 joblib = "*"
 html5lib = "*"
 markdown = "*"
+flask-paginate = "*"
+flask-admin = "*"
+flask-menu = "*"
+blinker = "*"
+pandas = "*"
+attr = "*"
+authlib = "*"
+python-gitlab = "*"
 
 [dev-packages]
 

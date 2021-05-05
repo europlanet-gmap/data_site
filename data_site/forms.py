@@ -22,18 +22,20 @@ from wtforms.validators import (
     EqualTo,
     Length,
     NumberRange,
+    Optional,
     Regexp
     )
 
 from .models import User
-
-
 
 class LoginForm(FlaskForm):
     email = StringField('Email', validators=[DataRequired(), Length(1, 254), Email()])
     password = PasswordField('Password', validators=[DataRequired()])
     remember_me = BooleanField('Remember me')
     submit = SubmitField('Log in')
+
+class LoginFormGitlab(FlaskForm):
+    submit = SubmitField('Log in via GMAP Gitlab')
 
 
 class RegisterForm(FlaskForm):
@@ -43,7 +45,7 @@ class RegisterForm(FlaskForm):
         validators=[
             DataRequired(),
             Length(1, 20),
-            Regexp('^[a-zA-Z0-9]*$',
+                                                   Regexp('^[a-zA-Z0-9]*$',
                     message='The username should contain only a-z, A-Z and 0-9.')
         ]
     )
@@ -66,7 +68,6 @@ class RegisterForm(FlaskForm):
         'Confirm password',
         validators=[DataRequired()]
     )
-
     submit = SubmitField()
 
     def validate_email(self, field):
@@ -168,3 +169,17 @@ class PackageForm(FlaskForm):
     acknowlegments = StringField()
 
     submit = SubmitField('Submit')
+
+
+class SearchForm(FlaskForm):
+    query = StringField("Query", validators=[Optional()])
+    body = SelectField("Body", validators=[Optional()])
+    creator = SelectField("Creator", validators=[Optional()])
+    submit = SubmitField("Search")
+    reset = SubmitField("Reset")
+
+    def set_bodies(self, bodies):
+        self.body.choices = bodies
+
+    def set_creators(self, creators):
+        self.creator.choices = creators

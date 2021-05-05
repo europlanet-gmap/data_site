@@ -61,3 +61,7 @@ $ flask remove-planmap
 # TODO
 
 - [ ] Make a frontpage (index) with a minimal form (eg, "{ name: <> }")
+
+
+# modules to consider
+- https://potion.readthedocs.io to manage the Restful API

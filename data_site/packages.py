@@ -15,6 +15,8 @@ from flask import (
 )
 
 from flask_login import current_user
+from flask_menu import register_menu
+from flask_paginate import Pagination, get_page_args
 
 from markupsafe import Markup
 from markdown import markdown, Markdown
@@ -23,8 +25,10 @@ from werkzeug.exceptions import abort
 
 from data_site import db, form, utils
 from data_site.auth import login_required
-from data_site.forms import PackageForm, UploadFile
-from data_site.models import DataPackage
+
+from data_site.forms import PackageForm, SearchForm, UploadFile
+from data_site.models import DataPackage, User
+
 
 
 def flash_errors(form):
@@ -46,6 +50,7 @@ packages = Blueprint('packages', __name__)
 
 
 @packages.route('/packages', methods=["GET"])
+@register_menu(packages, 'packages.list', 'Packages List', order=10, type="main")
 def index():
     s = request.args.get('sort', 'id')
     direction = request.args.get('direction', 'id')
@@ -63,12 +68,91 @@ def index():
     return render_template('packages/index.html', table=table)
 
 
+def get_unique_values_for_form(field, label="planetary_body"):
+    values = db.session.query(field.distinct().label(label)).filter(field != None).all()
+    values = [b[0] for b in values]
+    values.insert(0,"Any")
+    return [[str(b), str(b).capitalize()] for b in values]
+
+
+@packages.route('/all-packages/', methods=["GET", "POST"])
+@register_menu(packages, 'packages.packs', 'Packages', order=0, type="main")
+def all_packages():
+
+    default_args ={"query":"", "body":"Any", "creator": "Any"}
+    page = request.args.get('page', 1, type=int) # get the page number
+
+    if request.method != 'POST' and "args" in session.keys(): # we are not submitting any new search criteria
+        args = session['args'] # we retrieve the latest values
+    else:
+        session['args'] =default_args
+        args = {}
+
+
+    form = SearchForm(**args)
+
+
+    from .models import DataPackage
+
+    bodies= get_unique_values_for_form(DataPackage.planetary_body_id, label="planetary_body")
+    form.set_bodies(bodies)
+
+    creators = get_unique_values_for_form(User.username, label="username")
+    form.set_creators(creators)
+
+    q = DataPackage.query # set up the query
+
+    if form.validate_on_submit(): # new submission -> save into session
+
+        if form.reset.data:
+            session["args"] = default_args # reset to default and reload
+            return redirect(url_for("packages.all_packages"))
+
+        session["args"] = request.form
+
+    # extract filters
+    query = session["args"]["query"]
+    body = session["args"]["body"]
+    creator = session["args"]["creator"]
+
+    if query:
+        q = q.filter(DataPackage.name.like('%' + query + '%'))
+
+    if body != "Any":
+        q = q.filter_by(planetary_body=body)
+
+    if creator != "Any":
+        q = q.join(DataPackage.creator, aliased=True) \
+            .filter_by(username = creator)
+
+    packs = q.paginate(page=page, per_page=12)
+    pagination = Pagination(page=page, per_page=12, total=q.count(),
+                            css_framework='bootstrap4', alignment="right")
+
+
+    return render_template("packages/all_packages.html", packages=packs.items, spanning=4, search_form=form, pagination=pagination)
+
+
 @packages.route("/<int:id>/record")
 def view(id):
     pack = DataPackage.query.filter_by(id=id).first()
 
-    if pack.body is not None:
-        body = pack.body
+    # Luca stuff
+    # ----------
+    # from markdown import markdown
+    #
+    if pack.description is not None:
+        body = pack.description
+    # else:
+    #     body = "<h6> No description for this package </h6>"
+    #
+    #
+    # return render_template("packages/view.html", package_name=pack.name, description=Markup(body))
+
+    # Carlos stuff
+    # ------------
+    # if pack.body is not None:
+    #     body = pack.body
     else:
         body = "# No description for this package"
 
@@ -80,22 +164,10 @@ def view(id):
     ashtml = markdown(body_str, extensions=['tables'])
     print(body_str)
     print(ashtml)
+    
     return render_template("packages/view.html", package_name=pack.name, description=Markup(ashtml))
 
 
-# def submit_package(form_data, files=None):
-#     data = {k:v for k,v in form_data.items()
-#                 if k not in ('submit','csrf_token')}
-#     if files:
-#         data.update({'files':files})
-#     content = json.dumps(data)
-#     p = DataPackage(name=data['name'], creator_id=current_user.id,
-#                     planetary_body=data['target_body'],
-#                     body=content)
-#     db.session.add(p)
-#     db.session.commit()
-#     save_package(form_data, files)
-#     return p.id
 
 
 class PackageData:
@@ -142,6 +214,7 @@ class PackageData:
 
 
 @packages.route('/create', methods=('GET', 'POST'))
+@register_menu(packages, 'user.create', 'New Package', order=100, visible_when=lambda: current_user.is_authenticated)
 @login_required
 def create():
     """
