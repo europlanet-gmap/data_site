@@ -78,12 +78,15 @@ def update_planetary_bodies_list(force=False):
 
         add_body_if_missing(name, is_planet)
 
-
 @click.command('first_init', help="initialize the app with def entries (for dev testing)")
 @with_appcontext
 @click.pass_context
 def initialize(ctx):
     print("init")
+    from .auth import init_roles
+
+    ctx.invoke(init_roles)
+
     ctx.invoke(update_planetary_bodies_list)
     from .planmap_importer import import_planmap_packages
     ctx.invoke(import_planmap_packages)

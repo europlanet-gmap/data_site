@@ -212,6 +212,12 @@ class PackageData:
     def __del__(self):
         shutil.rmtree(self.data['dir'])
 
+@packages.route('/create2', methods=('GET', 'POST'))
+@register_menu(packages, 'user.create2', 'New Package 2', order=100, visible_when=lambda: current_user.is_authenticated)
+@login_required
+def create2():
+    return redirect(url_for("datapackage.create_view"))
+
 
 @packages.route('/create', methods=('GET', 'POST'))
 @register_menu(packages, 'user.create', 'New Package', order=100, visible_when=lambda: current_user.is_authenticated)

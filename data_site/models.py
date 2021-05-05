@@ -1,4 +1,4 @@
-from flask import current_app
+from flask import current_app, flash
 from werkzeug.security import generate_password_hash, check_password_hash
 
 from . import db
@@ -59,7 +59,17 @@ class Role(db.Model):
     permissions = db.relationship('Permission', secondary=roles_permissions, back_populates='roles')
 
     @staticmethod
+    def get_role(name):
+        role = Role.query.filter_by(name=name).first()
+        if not role:
+            flash(f"Debug: role {name} do not exists")
+        return role
 
+    @staticmethod
+    def get_admin_role():
+        return Role.get_role("Administrator")
+
+    @staticmethod
     def init_default_roles():
         print("inizializing default roles")
         roles_permissions_map = {
@@ -148,3 +158,12 @@ class User(db.Model, UserMixin):
 
     def __repr__(self):
         return self.username
+
+    def allow_admin(self):
+        admin_role = Role.get_admin_role()
+        if admin_role:
+            self.role = admin_role
+
+    def is_admin(self):
+        admin_role = Role.get_admin_role()
+        return self.role == admin_role

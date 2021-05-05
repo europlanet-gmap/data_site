@@ -12,7 +12,9 @@ from loginpass import create_flask_blueprint, create_gitlab_backend
 from .commands import init_commands
 
 from .planmap_importer import init_app as planmap_importer_init
+from .static_pages import Pages
 
+pages = Pages()
 
 babel = Babel()
 bootstrap = Bootstrap()
@@ -77,15 +79,14 @@ def create_app(test_config=None):
 
     babel.init_app(app)
 
-    menu_manager.init_app(app)
 
     planmap_importer_init(app)
 
     init_commands(app)
 
     # init gitlab oauth integration
-    app.config["GITLAB_CLIENT_ID"] =''
-    app.config["GITLAB_CLIENT_SECRET"]=''
+    app.config["GITLAB_CLIENT_ID"] = os.environ.get("GITLAB_CLIENT_ID")
+    app.config["GITLAB_CLIENT_SECRET"]=os.environ.get("GITLAB_CLIENT_SECRET")
 
     oauth.init_app(app)
 
@@ -97,9 +98,6 @@ def create_app(test_config=None):
     from .auth import handle_authorize
     bp = create_flask_blueprint(backends, oauth, handle_authorize)
     app.register_blueprint(bp, url_prefix='')
-
-
-
 
 
     db_path = os.path.join(app.instance_path, 'database.sqlite')
@@ -121,6 +119,8 @@ def create_app(test_config=None):
     migrate.init_app(app, db)
 
     admin.init_app(app)
+
+    menu_manager.init_app(app)
 
     # menu.init_app(app)
 
@@ -149,6 +149,8 @@ def create_app(test_config=None):
 
     # database init
     from .models import DataPackage, User
+
+    pages.init_app(app)
 
     create_database(app)
     # logins management

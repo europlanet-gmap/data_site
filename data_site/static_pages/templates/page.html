@@ -1,0 +1,19 @@
+{% extends 'base.html' %}
+
+{% block title %}  {{ page.title }}{% endblock %}
+
+{% block content %}
+
+
+<div class="container">
+
+{% if page.title %}
+  <div class="jumbotron justify-content-center bg-dark">
+    <h2 class="text-white">{{  page.title }}</h2>
+{#    <p class="lead text-muted" > Search GMAP packages</p>#}
+  </div>
+
+    {% endif %}
+        {{ page }}
+</div>
+{%  endblock %}

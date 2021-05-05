@@ -1,6 +1,7 @@
 # simple admin iface
 from flask_admin import Admin
 from flask_admin.form import rules
+from flask_login import current_user
 from wtforms import PasswordField
 
 from .models import User, DataPackage, PlanetaryBody, Role, Permission
@@ -12,6 +13,9 @@ from wtforms import validators
 
 
 class AdminViewBase(ModelView):
+    def is_accessible(self):
+        return  current_user.is_authenticated and current_user.is_admin()
+
     column_hide_backrefs = False
 
 
@@ -21,7 +25,7 @@ class UserView(AdminViewBase):
     form_excluded_columns = ('password_hash')
 
     form_extra_fields = {
-        'password': PasswordField('Password', [validators.DataRequired()])
+        'password': PasswordField('Password')
     }
 
     form_args = dict(
@@ -33,9 +37,8 @@ class UserView(AdminViewBase):
         if form.password.data is not None:
             User.set_password(form.password.data)
 
-    def on_form_prefill(self, form, id):
-        form.password.data = '********'
-        form.username.data = ""
+    # def on_form_prefill(self, form, id):
+    #     form.password.data = ""
 
 from wtforms import TextAreaField
 from wtforms.widgets import TextArea
@@ -52,6 +55,20 @@ class CKTextAreaField(TextAreaField):
     widget = CKTextAreaWidget()
 
 class DataPackageView(AdminViewBase):
+    pass
+    # # create_modal = True
+    # column_list = ("id", "name", "creation_date", "description", "planetary_body", "thumbnail_url")
+    # column_searchable_list = ("name", "description")
+    extra_js = ['//cdn.ckeditor.com/4.6.0/standard/ckeditor.js']
+
+    form_overrides = {
+        'description': CKTextAreaField
+    }
+
+class UserDataPackageView(AdminViewBase):
+    def is_accessible(self):
+        return current_user.is_authenticated
+
     pass
     # # create_modal = True
     # column_list = ("id", "name", "creation_date", "description", "planetary_body", "thumbnail_url")

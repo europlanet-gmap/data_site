@@ -5,6 +5,7 @@ from flask.cli import with_appcontext
 
 
 # from .. import db
+from flask_login import logout_user
 
 
 @click.command('import-planmap')
@@ -44,6 +45,8 @@ def import_planmap_packages():
             db.session.add(p)
 
     db.session.commit()
+    logout_user()
+
 
 
 @click.command("remove-planmap")

@@ -36,6 +36,9 @@
     {{ bootstrap.load_css() }}
     <!-- Custom styles for this template -->
     <!-- <link href="form-validation.css" rel="stylesheet"> -->
+
+{% block head %}{% endblock %}
+
 </head>
 
 
@@ -43,7 +46,7 @@
 
 
 
-<nav class="navbar navbar-expand-lg navbar-light bg-light">
+<nav class="navbar navbar-expand-lg navbar-light bg-light mb-4">
     <div class="container">
         <a class="navbar-brand" href="{{ url_for('main.index') }}">
             <img src="{{ url_for('static', filename='logo.svg') }}" alt="GMAP Data submission" width="250px">
@@ -143,7 +146,7 @@
 
     {{ bootstrap.load_js() }}
 
-    <script src="static/scripts.js"> </script>
+    <script src="{{ url_for("static", filename="scripts.js")  }}"> </script>
 
     {#  <script src="https://code.jquery.com/jquery-3.5.1.slim.min.js" integrity="sha384-DfXdz2htPH0lsSSs5nCTpuj/zy4C+OGpamoFVy38MVBnE+IbbVYUew+OrCXaRkfj" crossorigin="anonymous">#}
     {#  </script>#}
