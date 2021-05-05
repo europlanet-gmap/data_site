@@ -112,7 +112,7 @@ class DataPackage(db.Model):
     name = db.Column(db.String(10000)) # package name, should be enough to find out the url for downloading the package
     creation_date = db.Column(db.DateTime(timezone=True), default=func.now())
     creator_id = db.Column(db.Integer, db.ForeignKey('user.id')) # user who created the dataset
-    # creator = db.relationship("User") # allows to access creator as an User instance
+    creator = db.relationship("User",  back_populates="packages") # allows to access creator as an User instance
     description = db.Column(db.String(1500000))
     # body_format = db.Column(db.String(20), default=None) # format of 'body' content, this will be used for rendering it
     planetary_body_id = db.Column(db.Integer, db.ForeignKey('planetary_body.id'))
@@ -146,7 +146,7 @@ class User(db.Model, UserMixin):
     first_name = db.Column(db.String(150))
     last_name = db.Column(db.String(150))
     location = db.Column(db.String(150))
-    packages = db.relationship('DataPackage', backref="creator", lazy='dynamic') # so we can access a list of this user packages
+    packages = db.relationship('DataPackage', back_populates="creator", lazy='dynamic') # so we can access a list of this user packages
 
     role_id = db.Column(db.Integer, db.ForeignKey('role.id'))
     role = db.relationship('Role', back_populates='users')
