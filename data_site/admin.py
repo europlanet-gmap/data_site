@@ -8,6 +8,9 @@ from flask_admin.contrib.sqla import ModelView
 from flask_admin import Admin
 
 from wtforms import validators
+from wtforms import TextAreaField
+from wtforms.widgets import TextArea
+
 
 from data_site import db
 from data_site.models import (
@@ -19,11 +22,32 @@ from data_site.models import (
     )
 
 
+class AdminViews(object):
+    def init_app(self, app):
+        self.admin = Admin(name='data_site', template_mode='bootstrap4')
+        self.admin.init_app(app)
+
+        mv = UserView(User, db.session, category="Users")
+        self.admin.add_view(mv)
+
+        mv = DataPackageView(DataPackage, db.session, category="Packages")
+        self.admin.add_view(mv)
+
+        mv = PlanetaryBodyView(PlanetaryBody, db.session, category="Packages")
+        self.admin.add_view(mv)
+
+        mv = RoleView(Role, db.session, category="Users")
+        self.admin.add_view(mv)
+
+        mv = RoleView(Permission, db.session, category="Users")
+        self.admin.add_view(mv)
+
+
 class AdminViewBase(ModelView):
+    column_hide_backrefs = False
+
     def is_accessible(self):
         return  current_user.is_authenticated and current_user.is_admin()
-
-    column_hide_backrefs = False
 
 
 class UserView(AdminViewBase):
@@ -44,11 +68,6 @@ class UserView(AdminViewBase):
         if form.password.data is not None:
             User.set_password(form.password.data)
 
-    # def on_form_prefill(self, form, id):
-    #     form.password.data = ""
-
-from wtforms import TextAreaField
-from wtforms.widgets import TextArea
 
 class CKTextAreaWidget(TextArea):
     def __call__(self, field, **kwargs):
@@ -58,28 +77,27 @@ class CKTextAreaWidget(TextArea):
             kwargs.setdefault('class', 'ckeditor')
         return super(CKTextAreaWidget, self).__call__(field, **kwargs)
 
+
 class CKTextAreaField(TextAreaField):
     widget = CKTextAreaWidget()
 
+
 class DataPackageView(AdminViewBase):
     pass
-    # # create_modal = True
-    # column_list = ("id", "name", "creation_date", "description", "planetary_body", "thumbnail_url")
-    # column_searchable_list = ("name", "description")
+
     extra_js = ['//cdn.ckeditor.com/4.6.0/standard/ckeditor.js']
 
     form_overrides = {
         'description': CKTextAreaField
     }
+
 
 class UserDataPackageView(AdminViewBase):
     def is_accessible(self):
         return current_user.is_authenticated
 
     pass
-    # # create_modal = True
-    # column_list = ("id", "name", "creation_date", "description", "planetary_body", "thumbnail_url")
-    # column_searchable_list = ("name", "description")
+
     extra_js = ['//cdn.ckeditor.com/4.6.0/standard/ckeditor.js']
 
     form_overrides = {
@@ -87,10 +105,8 @@ class UserDataPackageView(AdminViewBase):
     }
 
 
-
 class PlanetaryBodyView(AdminViewBase):
     column_list = ('name', "is_planet", "packages")
-
 
 
 class RoleView(AdminViewBase):
@@ -99,27 +115,3 @@ class RoleView(AdminViewBase):
 
 class PermissionView(AdminViewBase):
     pass
-
-
-class AdminViews(object):
-    def init_app(self, app):
-        self.admin = Admin(name='data_site', template_mode='bootstrap4')
-        self.admin.init_app(app)
-
-        mv = UserView(User, db.session, category="Users")
-
-        self.admin.add_view(mv)
-
-        mv = DataPackageView(DataPackage, db.session, category="Packages")
-
-        self.admin.add_view(mv)
-
-        mv = PlanetaryBodyView(PlanetaryBody, db.session, category="Packages")
-
-        self.admin.add_view(mv)
-
-        mv = RoleView(Role, db.session, category="Users")
-        self.admin.add_view(mv)
-
-        mv = RoleView(Permission, db.session, category="Users")
-        self.admin.add_view(mv)

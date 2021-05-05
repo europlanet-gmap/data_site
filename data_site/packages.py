@@ -164,7 +164,7 @@ def view(id):
     ashtml = markdown(body_str, extensions=['tables'])
     print(body_str)
     print(ashtml)
-    
+
     return render_template("packages/view.html", package_name=pack.name, description=Markup(ashtml))
 
 
@@ -184,9 +184,13 @@ class PackageData:
         self._write_data(under=pkg_path)
 
         # Write metadata as readme/markdown to database
-        p = DataPackage(name=self.meta['name'], creator_id=current_user.id,
-                        planetary_body=self.meta['target_body'],
-                        body=json.dumps(self.meta)
+        creator_id=current_user.id,
+        planetary_body=self.meta['target_body'],
+        description=json.dumps(self.meta)
+        p = DataPackage(name=self.meta['name'],
+                        creator_id=creator_id,
+                        # planetary_body=planetary_body,
+                        description=description
                         )
         db.session.add(p)
         db.session.commit()

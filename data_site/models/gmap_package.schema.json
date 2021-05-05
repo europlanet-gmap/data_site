@@ -1,0 +1,17 @@
+{
+    "$schema": "https://json-schema.org/draft/2020-12/schema",
+
+    "$id": "gmap_package.schema",
+
+    "title": "GMAP package schema",
+    "description": "GMAP data packages are summarized by a set of metadata, defined here.",
+
+    "type": "object",
+
+    "properties": {
+      "meta.json": { "$ref" : "gmap_package_meta.json#" },
+      "document/": { "$ref" : "gmap_package_document.json#" },
+      "vector/": { "$ref" : "gmap_package_vector.json#" },
+      "raster/": { "$ref" : "gmap_package_raster.json#" }
+    }
+}
