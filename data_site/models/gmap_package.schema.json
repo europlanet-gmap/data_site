@@ -13,5 +13,9 @@
       "document/": { "$ref" : "gmap_package_document.json#" },
       "vector/": { "$ref" : "gmap_package_vector.json#" },
       "raster/": { "$ref" : "gmap_package_raster.json#" }
-    }
+    },
+
+    "required": [
+      "meta.json"
+    ],
 }
