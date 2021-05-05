@@ -36,9 +36,8 @@ def update_planetary_bodies_list(force=False):
     def add_body_if_missing(name, is_planet=False):
         if name == "":
             return
-        import distutils
         if isinstance(is_planet, str):
-            is_planet = distutils.util.strtobool(is_planet)
+            is_planet = True if is_planet.lower().strip() == 'true' else False
         name = name.strip()
         found = PlanetaryBody.query.filter_by(name=name).first()
         if not found:
@@ -93,4 +92,3 @@ def initialize(ctx):
     #
     from .models import Role
     Role.init_default_roles()
-
