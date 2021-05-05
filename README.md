@@ -10,11 +10,26 @@ tools we already have built.
 
 
 ## Run help
-
 To see the available commands to run flask (locally):
 
 ```bash
 $ flask
+```
+
+
+### Initialize App roles
+User roles (admin, etc) need to be initialized:
+
+```bash
+$ flask auth init_roles
+```
+
+
+### Planmap sample data
+To start the app with sample/example data, do
+
+```bash
+$ flask first_init
 ```
 
 
@@ -25,14 +40,6 @@ $ export FLASK_APP='data_site'
 $ export FLASK_ENV='development'
 $
 $ flask run
-```
-
-### Sample data
-
-To start the app with sample/example data do
-
-```bash
-$ flask first-init
 ```
 
 > And then, `$ flask run```
