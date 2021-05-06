@@ -99,7 +99,7 @@ class PlanetaryBody(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     name = db.Column(db.String(1000), nullable=False, unique=True)
     is_planet = db.Column(db.Boolean())
-    packages = db.relationship('DataPackage', back_populates='planetary_body', uselist=False)
+    packages = db.relationship('DataPackage', back_populates='planetary_body', uselist=True)
 
     def __repr__(self):
         return self.name

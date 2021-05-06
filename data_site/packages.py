@@ -20,7 +20,7 @@ from flask_paginate import Pagination, get_page_args
 
 from markupsafe import Markup
 from markdown import markdown, Markdown
-from sqlalchemy import distinct
+from sqlalchemy import distinct, func
 from vedo import Plane
 
 from werkzeug.exceptions import abort
@@ -58,7 +58,6 @@ packages = Blueprint('packages', __name__)
 def index():
     s = request.args.get('sort', 'id')
     direction = request.args.get('direction', 'id')
-    # sort = creation_date & direction = asc
     from sqlalchemy import asc, desc
     if direction =="desc":
         sf = desc
@@ -72,7 +71,6 @@ def index():
     return render_template('packages/index.html', table=table)
 
 def clear_values(values):
-    print(values)
     values = [b[0] for b in values]
     values.insert(0, "Any")
     return [[str(b), str(b).capitalize()] for b in values]
@@ -83,18 +81,10 @@ def get_unique_values_for_form(field, label="planetary_body"):
 
 def get_unique_values_for_bodies(field):
     from data_site.models import PlanetaryBody
-    values = db.session.query(DataPackage)\
-        \
-        .all()
+    q = db.session.query(PlanetaryBody.name, PlanetaryBody.id).filter(PlanetaryBody.packages != None)
+    return clear_values(q.all())
 
 
-    return clear_values(values)
-
-
-    # query = db.session.query(distinct(Document.id))\
-    #           .join(DocumentEntity)\
-    #           .filter(DocumentEntity.entity_id == entity.id)\
-    #           .order_by(Document.published_at.desc())
 
 @packages.route('/all-packages/', methods=["GET", "POST"])
 @register_menu(packages, 'packages.packs', 'Packages', order=0, type="main")
@@ -143,7 +133,7 @@ def all_packages():
         q = q.filter(DataPackage.name.like('%' + query + '%'))
 
     if body != "Any":
-        q = q.filter_by(planetary_body_id=body)
+        q = q.filter(DataPackage.planetary_body.has(name=body))
 
     if creator != "Any":
         q = q.join(DataPackage.creator, aliased=True) \
