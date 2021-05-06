@@ -33,7 +33,7 @@ joblib = "*"
 html5lib = "*"
 markdown = "*"
 flask-paginate = "*"
-flask-admin = "*"
+flask-admin = {git = "https://github.com/flask-admin/flask-admin.git"}
 flask-menu = "*"
 blinker = "*"
 pandas = "*"
@@ -47,6 +47,7 @@ pygments = "*"
 flask-email = "*"
 flask-mail = "*"
 lxml = "*"
+simplejson = "*"
 
 [dev-packages]
 
