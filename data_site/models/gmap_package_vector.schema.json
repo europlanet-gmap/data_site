@@ -1,0 +1,12 @@
+{
+  "$id": "gmap_package_vector.schema",
+
+  "title": "GMAP package vector data schema",
+
+  "type": "array",
+  "minItems": 1,
+  "items": {
+    "type": "string"
+    "pattern": "^[A-Za-z][A-Za-z0-9_]*.{gpkg,shp}$"
+  }
+}

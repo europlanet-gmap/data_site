@@ -1,0 +1,12 @@
+{
+  "$id": "gmap_package_raster.schema",
+
+  "title": "GMAP package raster data schema",
+
+  "type": "array",
+  "minItems": 1,
+  "items": {
+    "type": "string"
+    "pattern": "^[A-Za-z][A-Za-z0-9_]*.{tif,tiff,cog}$"
+  }
+}
