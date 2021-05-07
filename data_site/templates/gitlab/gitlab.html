@@ -1,0 +1,18 @@
+{% extends "base.html" %}
+
+{% block content %}
+    <ul>
+        {% for d in data.keys() %}
+            <li> Project: {{ data[d]["project_name"] }}
+                <ul>
+                    {% for key, val in data[d]["issues"].items() %}
+
+                        <li>
+                            Issue: {{ val["title"] }}
+                        </li>
+                    {% endfor %}
+                </ul>
+            </li>
+        {% endfor %}
+    </ul>
+{% endblock %}

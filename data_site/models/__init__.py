@@ -62,7 +62,8 @@ class Role(db.Model):
     def get_role(name):
         role = Role.query.filter_by(name=name).first()
         if not role:
-            flash(f"Debug: role {name} do not exists")
+            flash(f"Debug: role {name} does not exists")
+            return None
         return role
 
     @staticmethod
@@ -95,6 +96,9 @@ class Role(db.Model):
     def __repr__(self):
         return self.name
 
+
+
+
 class PlanetaryBody(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     name = db.Column(db.String(1000), nullable=False, unique=True)
@@ -108,7 +112,9 @@ class PlanetaryBody(db.Model):
     def get_unknwon_body():
         return PlanetaryBody.query.filter_by(name="unknown").first()
 
-
+class DataPackageMetadata(db.Model):
+    id = db.Column(db.Integer, primary_key=True)
+    package = db.relationship("DataPackage", back_populates="pkg_metadata")
 
 class DataPackage(db.Model):
     id = db.Column(db.Integer, primary_key=True)
@@ -121,6 +127,11 @@ class DataPackage(db.Model):
     planetary_body_id = db.Column(db.Integer, db.ForeignKey('planetary_body.id'))
     planetary_body = db.relationship("PlanetaryBody", back_populates="packages", lazy="joined")
     thumbnail_url =db.Column(db.String(1000))
+
+
+
+    pkg_metadata_id =  db.Column(db.Integer, db.ForeignKey('data_package_metadata.id'))
+    pkg_metadata = db.relationship("DataPackageMetadata", back_populates="package")
 
     @property
     def editable(self):
@@ -169,7 +180,9 @@ class User(db.Model, UserMixin):
 
     @property
     def is_admin(self):
+
         admin_role = Role.get_admin_role()
+        print(f"is admin called {admin_role}\n {self.role == admin_role}")
         return self.role == admin_role
 
     def can(self, permission_name):

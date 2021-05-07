@@ -19,6 +19,9 @@ def normalize_userinfo(client, data):
     }
 
 Gitlab.OAUTH_CONFIG["userinfo_compliance_fix"] = normalize_userinfo
+Gitlab.OAUTH_CONFIG["client_kwargs"]= {
+        'scope': 'read_user api'
+    }
 backends = [Gitlab]
 
 

@@ -1,16 +1,16 @@
-from flask_sqlalchemy import SQLAlchemy
-from flask_wtf.csrf import CSRFProtect
-from flask_mail import Mail
-from flask_migrate import Migrate
-from flask_login import LoginManager, AnonymousUserMixin
-
+from authlib.integrations.flask_client import OAuth
 from flask_babel import Babel
 from flask_bootstrap import Bootstrap
-from authlib.integrations.flask_client import OAuth
+from flask_login import LoginManager, AnonymousUserMixin
+from flask_mail import Mail
+from flask_migrate import Migrate
+from flask_sqlalchemy import SQLAlchemy
+from flask_wtf.csrf import CSRFProtect
 
+from data_site.admin import AdminViews
 from data_site.menu import MenuManager
 from data_site.static_pages import Pages
-from data_site.admin import AdminViews
+from data_site.planmap_importer import init_app as planmap_importer_init
 
 
 """
@@ -29,9 +29,8 @@ migrate = Migrate()
 pages = Pages()
 login_manager = LoginManager()
 mail = Mail()
-oauth= OAuth()
+oauth = OAuth()
 
-from data_site.planmap_importer import init_app as planmap_importer_init
 
 def create_database(app):
     print("verify presence of db")
@@ -40,6 +39,7 @@ def create_database(app):
         db.create_all(app=app)
     else:
         print("Database already exists")
+
 
 def register_extensions(app):
     db.init_app(app)
@@ -51,7 +51,6 @@ def register_extensions(app):
     oauth.init_app(app)
     babel.init_app(app)
     csrf.init_app(app)
-
 
     migrate.init_app(app, db)
     admin.init_app(app)

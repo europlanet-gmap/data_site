@@ -2,6 +2,7 @@
 from flask_admin import Admin, AdminIndexView, expose
 from flask_admin.contrib.fileadmin import FileAdmin
 from flask_admin.form import rules
+from flask_admin.model import InlineFormAdmin
 from flask_login import current_user
 from sqlalchemy import func
 from wtforms import PasswordField
@@ -121,11 +122,15 @@ class DataPackageView(AdminViewBase):
     }
 
 
+
+
+
 class UserDataPackageView(UserViewBase):
     column_list = ('name', "planetary_body", "creation_date", "description")
     column_filters = ("name", "planetary_body", "creation_date")
 
     form_columns = ("name", "planetary_body", "description")
+    
     # create_modal = True
 
     def on_model_change(self, form, DataPackage, is_created):

@@ -2,7 +2,7 @@
 
 import click
 
-from flask import Blueprint, render_template, request, flash, redirect, url_for, jsonify
+from flask import Blueprint, render_template, request, flash, redirect, url_for, jsonify, session
 from flask_menu import register_menu
 
 from .forms import RegisterForm, LoginForm, LoginFormGitlab
@@ -69,6 +69,10 @@ def handle_authorize(remote, token, user_info):
     """handels oauth authorized users"""
     # return jsonify(user_info)
 
+    print(f"--> HANDLING AUTH, token is {token}")
+
+    session["gitlab_token"] = token
+
     if user_info:
         user = User.query.filter_by(email=user_info["email"]).first()
 
@@ -78,6 +82,7 @@ def handle_authorize(remote, token, user_info):
             if user_info["is_admin"]:
                 print("--> user is admin")
                 user.allow_admin()
+                print(f"--> check {user.is_admin}")
 
 
             login_user(user, True)
