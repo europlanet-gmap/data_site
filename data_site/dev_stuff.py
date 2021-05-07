@@ -36,10 +36,12 @@ def register_dev_routes(app):
         import gitlab
         gl = gitlab.Gitlab(app.config["GITLAB_URL"], oauth_token=token["access_token"])
 
-        projects = gl.projects.list()
+        u = gl.users.get(current_user.gitlab_id)
+        projects = u.projects.list()
 
         out = {}
         for p in projects:
+            p = gl.projects.get(p.id)
             out[p.id] = {"project_name" : p.name}
             issues = p.issues.list()
             iss = {}

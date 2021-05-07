@@ -64,6 +64,18 @@ def login_old():
         flash('Invalid email or password.', 'warning')
     return render_template('auth/login.html', form=form)
 
+def update_user_info(user, user_info):
+    print("-->  updating user info")
+    if user_info["is_admin"]:
+        user.allow_admin()
+
+    user.email = user_info["email"]
+    user.username = user_info["preferred_username"]
+    user.gitlab_id = user_info["sub"]
+
+    print(user.username)
+
+
 
 def handle_authorize(remote, token, user_info):
     """handels oauth authorized users"""
@@ -76,27 +88,18 @@ def handle_authorize(remote, token, user_info):
     if user_info:
         user = User.query.filter_by(email=user_info["email"]).first()
 
-
-
-        if user is not None:
-            if user_info["is_admin"]:
-                print("--> user is admin")
-                user.allow_admin()
-                print(f"--> check {user.is_admin}")
-
-
-            login_user(user, True)
-            flash('Login success.', 'info')
-
-            return redirect_back()
-        else:
-            user = User(email = user_info["email"], username=user_info["preferred_username"])
-            if user_info["is_admin"]:
-                user.allow_admin()
+        if user is None:
+            user = User()
+            update_user_info(user, user_info)
             db.session.add(user)
             db.session.commit()
-            login_user(user, True)
-            return redirect_back()
+
+        else:
+            update_user_info(user, user_info)
+
+        login_user(user, False)
+        flash('Login success.', 'info')
+        return redirect_back()
 
     else:
         flash("Login unsuccessful. Please try again")

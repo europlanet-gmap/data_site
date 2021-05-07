@@ -159,6 +159,7 @@ class User(db.Model, UserMixin):
     first_name = db.Column(db.String(150))
     last_name = db.Column(db.String(150))
     location = db.Column(db.String(150))
+    gitlab_id = db.Column(db.Integer, unique=True)
     packages = db.relationship('DataPackage', back_populates="creator", lazy='dynamic') # so we can access a list of this user packages
 
     role_id = db.Column(db.Integer, db.ForeignKey('role.id'))
@@ -189,6 +190,8 @@ class User(db.Model, UserMixin):
         permission = Permission.query.filter_by(name=permission_name).first()
         return permission is not None and self.role is not None and permission in self.role.permissions
 
+    def __repr__(self):
+        return str(self.username)
 
 
 
