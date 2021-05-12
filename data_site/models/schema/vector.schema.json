@@ -1,0 +1,29 @@
+{
+  "title": "Match Geopackage layers list",
+  "$comment": "Defines mandatory layers, and allows extra ones.",
+  "$example": "{'geologic_contacts':'bla','geologic_units':'blu','layer_styles':'foo','linear_features':'wow','surface_features':'yay'}",
+
+  "type" : "object",
+
+  "properties": {
+    "layer_styles"      : { "type" : "object" },
+    "geologic_units"    : { "$ref": "#vector.units.schema"},
+    "linear_features"   : { "type" : "object" },
+    "surface_features"  : { "type" : "object" },
+    "geologic_contacts" : { "type" : "object" }
+  },
+
+  "required" : [
+    "geologic_units",
+    "linear_features",
+    "surface_features",
+    "geologic_contacts"
+  ],
+
+  "patternProperties" : {
+    "^[A-Za-z][A-Za-z0-9_]*$" : { "type" : "object" }
+  },
+
+  "additionalProperties" : { "type" : "object" }
+
+}

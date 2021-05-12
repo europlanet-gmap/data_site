@@ -1,0 +1,47 @@
+{
+  "$id": "package.layout.schema",
+
+  "title": "GMAP package layout",
+  "description": "GMAP packages are structured by a set of meta/data files/directories.",
+
+  "type": "object",
+
+  "properties": {
+
+    "meta.json": {
+      "type": "string",
+      "contentMediaType": "text/json"
+    },
+
+    "document/": {
+      "type": "array",
+      "minItems": 1,
+      "items": {
+        "type": "string"
+        "pattern": "^[A-Za-z][A-Za-z0-9_]*.{pdf,jpg,png}$"
+      }
+    },
+
+    "vector/": {
+      "type": "array",
+      "minItems": 1,
+      "items": {
+        "type": "string"
+        "pattern": "^[A-Za-z][A-Za-z0-9_]*.{gpkg,shp,zip}$"
+      }
+    },
+
+    "raster/": {
+      "type": "array",
+      "minItems": 1,
+      "items": {
+        "type": "string"
+        "pattern": "^[A-Za-z][A-Za-z0-9_]*.{tif,tiff,cog}$"
+      }
+    }
+  },
+
+  "required": [
+    "meta.json"
+  ],
+}

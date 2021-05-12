@@ -1,0 +1,152 @@
+{
+  "$id": "location.schema",
+
+  "title": "GMAP package metadata schema",
+  "description": "GMAP data packages are summarized by a set of metadata, defined here.",
+
+  "definitions": {
+    "planetary_bodies": {
+      "$id": "#planetary_bodies",
+      "type": "string",
+      "enum": [
+        "jupiter",
+        "mercury",
+        "mars",
+        "moon",
+        "neptun",
+        "pluto",
+        "saturn",
+        "urano",
+        "venus"
+      ]
+    },
+    "map_types": {
+      "$id": "#map_types",
+      "type": "string",
+      "enum": [
+        "compositional",
+        "morphological",
+        "stratigraphic"
+      ]
+    }
+  },
+
+  "type": "object",
+
+  "required": [
+      "label",
+      "target_body",
+      "description",
+      "author"
+  ],
+
+  "properties": {
+
+    "label": {
+        "type": "string",
+        "title": "Map label",
+        "description": "Package short label",
+        "minLength": 3,
+        "maxLength": 12
+    },
+
+    "title": {
+        "type": "string",
+        "title": "Map title",
+        "description": "Package short-sentence title",
+    },
+
+    "target_body": { "$ref": "#planetary_bodies" },
+
+    "map_type": { "$ref": "#map_types" },
+
+    "crs": {
+        "type": "string",
+        "description": "CRS used in the data"
+    },
+
+    "lat_min": {
+        "type": "number",
+        "description": "Minimum latitude in degress",
+        "minimum": -90,
+        "maximum": 90
+    },
+
+    "lat_max": {
+        "type": "number",
+        "description": "Maximum latitude in degress",
+        "minimum": -90,
+        "maximum": 90
+    },
+
+    "lon_west": {
+        "type": "number",
+        "description": "West (minimum) longitude in degress",
+        "minimum": -180,
+        "maximum": 180
+    },
+
+    "lon_east": {
+        "type": "number",
+        "description": "East (maximum) longitude in degress",
+        "minimum": -180,
+        "maximum": 180
+    },
+
+    "output_scale": {
+        "type": "string"
+    },
+
+    "authors": {
+        "type": "string"
+    },
+
+    "source_data": {
+        "type": "string"
+    },
+
+    "standards": {
+        "type": "string"
+    },
+
+    "doi": {
+        "type": "string"
+    },
+
+    "references": {
+        "type": "string"
+    },
+
+    "aims": {
+        "type": "string"
+    },
+
+    "description": {
+        "type": "string"
+    },
+
+    "related_products": {
+        "type": "string"
+    },
+
+    "units_definition": {
+        "type": "string"
+    },
+
+    "stratigraphic_info": {
+        "type": "string"
+    },
+
+    "comments": {
+        "type": "string"
+    },
+
+    "heritage": {
+        "type": "string"
+    },
+
+    "acknowlegments": {
+        "type": "string"
+    }
+  }
+}
