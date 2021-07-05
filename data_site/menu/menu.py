@@ -39,24 +39,12 @@ class MenuManager(object):
     def init_app(self, app):
         self.menu.init_app(app)
         app.menu = self
-        # app.cli.add_command(do_work)
         app.before_first_request_funcs.append(register_external_menu_items)
-
         app.register_blueprint(menu, url_prefix='/')
-
-        # @user_logged_in.connect_via(app)
-        # def _after_login_hook(sender, **extra):
-        #     print("--> exec after login hook")
-        #     tt = current_menu.submenu("user")
-        #     tt._text = current_user.username
-        #
-        # @user_logged_out.connect_via(app)
-        # def _after_logout_hook(sender, **extra):
-        #     tt = current_menu.submenu("user")
-        #     tt._text = "User"
 
 
 def register_external_menu_items():
+    print("Registering new menus")
     tt = current_menu.submenu("external")
     tt._text = "External Links"
     tt._order = 1000
@@ -67,11 +55,11 @@ def register_external_menu_items():
     tt.type = "user"
 
     tt = current_menu.submenu("user.admin")
-    tt._text = "Admin Dashboard"
+    tt._text = "Dashboard"
     tt.type = "user"
     tt._order = 2000
     tt._endpoint = "admin.index"
-    tt._visible_when = lambda:  current_user.is_admin
+    tt._visible_when = lambda:  current_user.is_authenticated
 
     tt = current_menu.submenu("packages")
     tt._text = "Packages"

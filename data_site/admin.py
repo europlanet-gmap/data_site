@@ -1,7 +1,10 @@
 # simple admin iface
-from flask_admin import Admin
+from flask_admin import Admin, AdminIndexView, expose
+from flask_admin.contrib.fileadmin import FileAdmin
 from flask_admin.form import rules
+from flask_admin.model import InlineFormAdmin
 from flask_login import current_user
+from sqlalchemy import func
 from wtforms import PasswordField
 
 from flask_admin.contrib.sqla import ModelView
@@ -10,6 +13,12 @@ from flask_admin import Admin
 from wtforms import validators
 from wtforms import TextAreaField
 from wtforms.widgets import TextArea
+
+class DashboardView(AdminIndexView):
+
+    def is_visible(self):
+        # This view won't appear in the menu structure
+        return False
 
 
 
@@ -27,7 +36,7 @@ class AdminViews(object):
 
         from data_site.extensions import db
 
-        self.admin = Admin(name='data_site', template_mode='bootstrap4')
+        self.admin = Admin(name='data_site', template_mode='bootstrap4', base_template="admin/new_base.html", index_view=DashboardView())
         self.admin.init_app(app)
 
         mv = UserView(User, db.session, category="Users")
@@ -45,12 +54,31 @@ class AdminViews(object):
         mv = RoleView(Permission, db.session, category="Users")
         self.admin.add_view(mv)
 
+        mv = UserDataPackageView(DataPackage, db.session, name="My Packages", endpoint="user_packs")
+        self.admin.add_view(mv)
+
+        import os.path
+        path = os.path.join(os.path.dirname(__file__), 'static')
+        self.admin.add_view(MyFileAdmin(path, '/static/', name='Static Files', endpoint="files"))
+
+
+class MyFileAdmin(FileAdmin):
+    def is_accessible(self):
+        return current_user.is_admin
+
+
 
 class AdminViewBase(ModelView):
     column_hide_backrefs = False
 
     def is_accessible(self):
         return  current_user.is_admin
+
+class UserViewBase(ModelView):
+    column_hide_backrefs = True
+
+    def is_accessible(self):
+        return  current_user.is_authenticated
 
 
 class UserView(AdminViewBase):
@@ -86,7 +114,6 @@ class CKTextAreaField(TextAreaField):
 
 
 class DataPackageView(AdminViewBase):
-    pass
 
     extra_js = ['//cdn.ckeditor.com/4.6.0/standard/ckeditor.js']
 
@@ -95,11 +122,34 @@ class DataPackageView(AdminViewBase):
     }
 
 
-class UserDataPackageView(AdminViewBase):
+
+
+
+class UserDataPackageView(UserViewBase):
+    column_list = ('name', "planetary_body", "creation_date", "description")
+    column_filters = ("name", "planetary_body", "creation_date")
+
+    form_columns = ("name", "planetary_body", "description")
+    
+    # create_modal = True
+
+    def on_model_change(self, form, DataPackage, is_created):
+
+        DataPackage.creator = current_user
+
+
+
     def is_accessible(self):
         return current_user.is_authenticated
 
-    pass
+    def get_query(self):
+        from data_site.models import DataPackage
+        return super(UserDataPackageView, self).get_query().filter(DataPackage.creator == current_user)
+
+    def get_count_query(self):
+        from data_site.models import DataPackage
+        return self.session.query(func.count('*')).select_from(self.model).filter(DataPackage.creator == current_user)
+
 
     extra_js = ['//cdn.ckeditor.com/4.6.0/standard/ckeditor.js']
 

@@ -20,6 +20,7 @@ class BaseConfig:
 
     MAIL_PREPEND = "[GMAP DATA]"
 
+    GITLAB_URL = "https://git.europlanet-gmap.eu/"
     GITLAB_CLIENT_ID = os.environ.get("GITLAB_CLIENT_ID")
     GITLAB_CLIENT_SECRET = os.environ.get("GITLAB_CLIENT_SECRET")
 

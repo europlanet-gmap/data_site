@@ -16,12 +16,11 @@ from flask import (
 
 from flask_login import current_user
 from flask_menu import register_menu
-from flask_paginate import Pagination, get_page_args
+from flask_paginate import Pagination
 
 from markupsafe import Markup
-from markdown import markdown, Markdown
-from sqlalchemy import distinct, func
-from vedo import Plane
+from markdown import markdown
+
 
 from werkzeug.exceptions import abort
 
@@ -231,7 +230,7 @@ class PackageData:
         shutil.rmtree(self.data['dir'])
 
 @packages.route('/create2', methods=('GET', 'POST'))
-@register_menu(packages, 'user.create2', 'New Package 2', order=100, visible_when=lambda: current_user.is_authenticated)
+@register_menu(packages, 'user_packs.create_view', 'New Package 2', order=100, visible_when=lambda: current_user.is_authenticated)
 @login_required
 def create2():
     return redirect(url_for("datapackage.create_view"))

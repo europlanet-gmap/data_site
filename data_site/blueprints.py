@@ -4,6 +4,7 @@ Gitlab = create_gitlab_backend("gitlab", "git.europlanet-gmap.eu")
 
 
 def normalize_userinfo(client, data):
+    print(data)
     return {
         'sub': str(data['id']),
         'name': data['name'],
@@ -19,6 +20,9 @@ def normalize_userinfo(client, data):
     }
 
 Gitlab.OAUTH_CONFIG["userinfo_compliance_fix"] = normalize_userinfo
+Gitlab.OAUTH_CONFIG["client_kwargs"]= {
+        'scope': 'read_user api email profile'
+    }
 backends = [Gitlab]
 
 
