@@ -197,8 +197,8 @@ class PackageData:
         self._write_data(under=pkg_path)
 
         # Write metadata as readme/markdown to database
-        creator_id=current_user.id,
-        planetary_body=self.meta['target_body'],
+        creator_id=current_user.id
+        planetary_body=self.meta['target_body']
         description=json.dumps(self.meta)
         p = DataPackage(name=self.meta['name'],
                         creator_id=creator_id,
